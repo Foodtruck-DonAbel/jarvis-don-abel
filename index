@@ -2,1741 +2,212 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora Don Abel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jarvis · Don Abel</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
-  :root {
-    --bg:#0a0d14;--surface:#111520;--surface2:#181d2e;--surface3:#1f2640;
-    --border:#2a3350;--border2:#3a4870;--navy:#1e3a6e;--navy-light:#2d5299;
-    --accent:#4472c8;--accent2:#6b9fe8;--green:#2ecc71;--green-dim:rgba(46,204,113,0.15);
-    --red:#e74c3c;--red-dim:rgba(231,76,60,0.15);--yellow:#f39c12;--yellow-dim:rgba(243,156,18,0.15);
-    --text:#e8ecf5;--text2:#a8b4cc;--muted:#5a6a8a;
-    --mayorista:#4472c8;--surpartner:#8b5cf6;--evercrisp:#10b981;
-    --radius-sm:8px;--radius:14px;--radius-lg:20px;
-    --shadow:0 4px 20px rgba(0,0,0,0.3);
-  }
-  body.light-mode {
-    --bg:#f0f4ff;--surface:#ffffff;--surface2:#e8edf8;--surface3:#dce3f5;
-    --border:#c8d0e8;--border2:#a8b4d0;--navy:#1e3a6e;--navy-light:#2d5299;
-    --accent:#4472c8;--accent2:#2d5299;--green:#1a8a4a;--green-dim:rgba(26,138,74,0.12);
-    --red:#c0392b;--red-dim:rgba(192,57,43,0.1);--yellow:#b7770d;--yellow-dim:rgba(183,119,13,0.1);
-    --text:#1a2240;--text2:#3a4870;--muted:#7a8ab0;
-    --shadow:0 4px 20px rgba(68,114,200,0.12);
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px 16px 40px;background-image:radial-gradient(ellipse 80% 40% at 50% -10%,rgba(68,114,200,0.12) 0%,transparent 70%),radial-gradient(ellipse 40% 30% at 90% 80%,rgba(30,58,110,0.08) 0%,transparent 60%);}
-  .header{text-align:center;padding:0;margin-bottom:6px;position:relative;}
-  .header::after{content:none;display:none;}
-  .header-logo{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border2);margin-bottom:10px;box-shadow:0 0 24px rgba(68,114,200,0.2);}
-  .header h1{font-size:26px;font-weight:800;letter-spacing:-0.5px;color:#fff;}
-  .header h1 span{color:var(--accent2);}
-  .header p{font-size:13px;color:var(--muted);margin-top:4px;letter-spacing:1px;text-transform:uppercase;}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;position:relative;overflow:hidden;}
-  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);}
-  .card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:14px;}
-  .user-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-  .user-btn{padding:12px 6px;border-radius:var(--radius);border:2px solid var(--border);background:var(--surface2);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center;letter-spacing:1px;}
-  .user-btn:hover{border-color:var(--border2);color:var(--text2);}
-  .user-btn.active{border-color:var(--accent);color:#fff;background:linear-gradient(135deg,var(--navy),var(--navy-light));box-shadow:0 4px 20px rgba(68,114,200,0.25);}
-  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
-  .form-group{margin-bottom:14px;}
-  .form-label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text2);margin-bottom:7px;}
-  .form-input{width:100%;padding:13px 16px;background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:15px;outline:none;transition:border-color 0.2s,box-shadow 0.2s;}
-  .form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(68,114,200,0.15);}
-  .form-input::placeholder{color:var(--muted);font-size:13px;}
-  /* Neutralizar autofill del browser */
-  .form-input:-webkit-autofill,
-  .form-input:-webkit-autofill:hover,
-  .form-input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0px 1000px var(--surface2) inset !important;
-    -webkit-text-fill-color: var(--text) !important;
-    transition: background-color 5000s ease-in-out 0s;
-  }
-  .toggle-row{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:12px 14px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);}
-  .toggle-label{font-size:14px;color:var(--text2);flex:1;font-weight:500;}
-  .toggle{position:relative;width:46px;height:26px;flex-shrink:0;}
-  .toggle input{opacity:0;width:0;height:0;}
-  .toggle-slider{position:absolute;inset:0;background:var(--border2);border-radius:26px;cursor:pointer;transition:0.2s;}
-  .toggle-slider:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:0.2s;}
-  .toggle input:checked+.toggle-slider{background:var(--surpartner);}
-  .toggle input:checked+.toggle-slider:before{transform:translateX(20px);}
-  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .link-mayorista{display:flex;align-items:center;gap:8px;padding:11px 16px;background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);color:var(--accent2);text-decoration:none;font-size:13px;font-weight:600;margin-bottom:14px;transition:border-color 0.2s;letter-spacing:0.3px;}
-  .link-mayorista:hover{border-color:var(--accent);}
-  .btn-calc{width:100%;padding:15px;border-radius:var(--radius);border:none;background:linear-gradient(135deg,var(--navy-light),var(--accent));color:#fff;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity 0.15s,transform 0.1s;margin-bottom:16px;letter-spacing:0.5px;box-shadow:0 4px 20px rgba(68,114,200,0.3);}
-  .btn-calc:active{transform:scale(0.98);}
-  .btn-calc:disabled{opacity:0.4;cursor:not-allowed;}
-  .costo-real-box{background:var(--surface2);border:2px solid var(--surpartner);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;display:none;}
-  .costo-real-box .label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:700;}
-  .costo-real-box .valor{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--surpartner);margin-top:4px;}
-  .desglose{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:5px;}
-  .desglose-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text2);font-family:'JetBrains Mono',monospace;}
-  .desglose-row.total{color:var(--surpartner);font-weight:700;font-size:14px;padding-top:6px;border-top:1px solid var(--border);margin-top:2px;}
-  .iaba-select-wrap{position:relative;margin-bottom:14px;}
-  .iaba-select-wrap::after{content:'\25be';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:14px;}
-  .iaba-select{width:100%;padding:13px 40px 13px 16px;background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;transition:border-color 0.2s;}
-  .iaba-select:focus{border-color:var(--surpartner);}
-  .iaba-select option{background:#181d2e;color:var(--text);}
-  .alerta{border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;display:none;font-size:14px;line-height:1.6;font-weight:500;}
-  .alerta-roja{background:var(--red-dim);border:2px solid var(--red);color:#ff8a80;}
-  .alerta-verde{background:var(--green-dim);border:2px solid var(--green);color:#69f0ae;}
-  .margenes-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-  .margen-item{background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;flex-direction:column;gap:4px;transition:border-color 0.2s;}
-  .margen-item:hover{border-color:var(--border2);}
-  .margen-item.highlight{border-color:var(--accent);background:linear-gradient(135deg,rgba(30,58,110,0.4),rgba(68,114,200,0.1));box-shadow:0 4px 16px rgba(68,114,200,0.15);}
-  .margen-item.pedidosya{border-color:#FF2C55;background:rgba(255,44,85,0.12);grid-column:span 2;flex-direction:row;align-items:center;justify-content:space-between;}
-  .margen-label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;}
-  .margen-valor{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--text);}
-  .margen-item.highlight .margen-valor{color:var(--accent2);font-size:24px;}
-  .margen-item.pedidosya .margen-valor{font-size:18px;color:#FF2C55;}
-  .margenes-grid-pack{display:grid;grid-template-columns:100px 1fr 1fr;gap:8px;margin-bottom:16px;}
-  .pack-header{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:1px;padding:8px 12px;background:var(--surface3);border-radius:var(--radius-sm);text-align:center;border:1px solid var(--border);}
-  .btn-save{width:100%;padding:15px;border-radius:var(--radius);border:none;background:linear-gradient(135deg,#1a7a4a,var(--green));color:#fff;font-family:'Syne',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity 0.15s,transform 0.1s;display:none;letter-spacing:0.5px;box-shadow:0 4px 20px rgba(46,204,113,0.25);}
-  .btn-save:active{transform:scale(0.98);}
-  .hist-item{background:var(--surface2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:8px;border-left:3px solid var(--border2);transition:border-color 0.2s;}
-  .hist-item.subio{border-left-color:var(--red);}
-  .hist-item.igual{border-left-color:var(--green);}
-  .hist-fecha{font-size:11px;color:var(--muted);margin-bottom:2px;}
-  .hist-costo{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--text);}
-  .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:linear-gradient(135deg,#1a7a4a,var(--green));color:#fff;padding:13px 28px;border-radius:50px;font-size:14px;font-weight:700;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;box-shadow:0 8px 30px rgba(46,204,113,0.3);font-family:'Syne',sans-serif;letter-spacing:0.5px;}
-  .toast.show{transform:translateX(-50%) translateY(0);}
-  .sep{height:1px;background:var(--border);margin:14px 0;}
-  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .input-money-wrap{position:relative;}
-  .input-money-wrap::before{content:'$';position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;pointer-events:none;z-index:1;}
-  .input-money-wrap .form-input{padding-left:28px;}
-  .prov-tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:0;}
-  .prov-tab{padding:10px 20px;background:transparent;border:none;color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;letter-spacing:0.3px;border-bottom:2px solid transparent;margin-bottom:-2px;}
-  .prov-tab:hover{color:var(--text2);}
-  .prov-tab.active{color:#fff;border-bottom-color:var(--accent);}
-  .prov-tab-content{display:none;padding-top:14px;}
-  .prov-tab-content.active{display:block;}
-  .prov-sub{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;}
-  .prov-btn{padding:12px 8px;border-radius:var(--radius-sm);border:2px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Syne',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;text-align:center;letter-spacing:0.3px;line-height:1.3;width:100%;}
-  .prov-btn:hover{border-color:var(--border2);color:var(--text);}
-  .prov-btn.active{color:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.3);}
-  .hidden{display:none !important;}
-
-  /* ── MENÚ ADM ── */
-  .adm-menu{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:2000;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);justify-content:center;align-items:center;}
-  .adm-menu.show{display:flex;}
-  .adm-menu-box{background:var(--surface);border:1px solid var(--border2);border-radius:20px;padding:24px;width:min(340px,90vw);box-shadow:0 20px 60px rgba(0,0,0,0.5);}
-  .adm-menu-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:16px;text-align:center;}
-  .adm-menu-btn{width:100%;padding:16px;border-radius:14px;border:2px solid var(--border2);background:var(--surface2);color:var(--text);font-family:'Syne',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:all 0.15s;text-align:left;display:flex;align-items:center;gap:12px;margin-bottom:10px;}
-  .adm-menu-btn:hover{border-color:var(--accent);background:rgba(68,114,200,0.1);}
-  .adm-menu-btn .adm-menu-icon{font-size:24px;width:36px;text-align:center;}
-  .adm-menu-btn .adm-menu-desc{font-size:11px;color:var(--muted);font-weight:500;margin-top:2px;}
-  .adm-menu-close{width:100%;padding:10px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);font-family:'Syne',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px;}
-  .adm-menu-close:hover{color:var(--text);}
-
-  /* ── CHIP DE SESIÓN ── */
-  .session-chip{display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px;min-height:22px;}
-  .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.3px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);transition:all 0.2s;}
-  .chip.active{background:rgba(68,114,200,0.15);border-color:var(--accent);color:var(--text);}
-  .chip-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0;}
-  .chip.active .chip-dot{background:var(--green);}
-  .chip-sep{color:var(--border2);font-size:10px;user-select:none;}
-
-  /* ── CONTADOR GUARDADOS ── */
-  .guardados-badge{display:none;position:fixed;top:52px;right:16px;z-index:990;background:var(--surface2);border:1px solid var(--green);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace;box-shadow:var(--shadow);}
-
-  /* ── TOAST ERROR separado ── */
-  .toast-error{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:linear-gradient(135deg,#7f1d1d,var(--red));color:#fff;padding:13px 28px;border-radius:50px;font-size:14px;font-weight:700;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);z-index:998;white-space:nowrap;box-shadow:0 8px 30px rgba(231,76,60,0.3);font-family:'Syne',sans-serif;letter-spacing:0.5px;}
-  .toast-error.show{transform:translateX(-50%) translateY(0);}
-
-  /* ── BORDE COLOR PROVEEDOR ── */
-  .card.prov-activa{border-top:3px solid var(--prov-color,var(--accent));}
-  .card.prov-activa::before{background:linear-gradient(90deg,transparent,var(--prov-color,var(--accent)),transparent);}
-
-  /* ── BOTÓN NUEVO PRODUCTO ── */
-  .btn-nuevo-prod{width:100%;padding:11px;border-radius:var(--radius);border:2px dashed var(--border2);background:transparent;color:var(--text2);font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:8px;letter-spacing:0.3px;}
-  .btn-nuevo-prod:hover{border-color:var(--accent2);color:var(--accent2);background:rgba(68,114,200,0.06);}
-
-  /* ── TOOLTIP EN BOTONES PROVEEDOR ── */
-  .prov-btn{position:relative;}
-  .prov-btn[data-tooltip]:hover::after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#0a0d14;color:#e8ecf5;border:1px solid var(--border2);border-radius:8px;padding:5px 10px;font-size:11px;white-space:nowrap;z-index:100;pointer-events:none;font-family:'Syne',sans-serif;font-weight:600;}
-
-  /* ── DASHBOARD ADM ── */
-  #dashboard-adm{display:none;}
-  .dash-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;}
-  .dash-title{font-size:20px;font-weight:800;color:var(--text);}
-  .dash-filtros{display:flex;gap:8px;flex-wrap:wrap;}
-  .dash-tab{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;}
-  .dash-tab.active{border-color:var(--accent);color:#fff;background:rgba(68,114,200,0.2);}
-  .dash-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px;}
-  #dash-cat-tabs .dash-tab{padding:10px 18px;font-size:14px;font-weight:700;}
-  .dash-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;text-align:center;}
-  .dash-kpi-val{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:800;color:var(--accent2);}
-  .dash-kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
-  .dash-section{margin-bottom:14px;}
-  .dash-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
-  .dash-fact-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-  .dash-fact-nro{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--accent2);min-width:70px;}
-  .dash-fact-prov{font-size:12px;font-weight:700;color:var(--text);flex:1;}
-  .dash-fact-meta{font-size:11px;color:var(--muted);}
-  .dash-fact-items{background:rgba(68,114,200,0.12);border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700;color:var(--accent2);font-family:'JetBrains Mono',monospace;}
-  .dash-alza-item{background:var(--surface2);border-left:3px solid var(--red);border-radius:8px;padding:9px 12px;margin-bottom:6px;}
-  .dash-baja-item{background:var(--surface2);border-left:3px solid var(--green);border-radius:8px;padding:9px 12px;margin-bottom:6px;}
-  .dash-prod-nombre{font-size:13px;font-weight:700;color:var(--text);}
-  .dash-prod-meta{font-size:11px;color:var(--muted);margin-top:2px;}
-  .dash-delta{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:800;}
-  .dash-empty{text-align:center;padding:24px;color:var(--muted);font-size:13px;}
-  .dash-user-filter{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
-  .dash-user-btn{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;}
-  .dash-user-btn.active{border-color:var(--accent2);color:var(--accent2);background:rgba(107,159,232,0.1);}
-  .btn-normalizar{padding:12px 20px;border-radius:var(--radius);border:2px solid var(--yellow);background:rgba(243,156,18,0.1);color:var(--yellow);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;width:100%;margin-top:8px;}
-  .btn-normalizar:hover{background:rgba(243,156,18,0.2);}
-  .btn-dashboard{padding:8px 16px;border-radius:20px;border:1px solid var(--border2);background:var(--surface2);color:var(--text2);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;display:none;}
-  .btn-dashboard.visible{display:inline-flex;align-items:center;gap:6px;}
-  .btn-dashboard:hover,.btn-dashboard.open{border-color:var(--accent);color:var(--accent2);background:rgba(68,114,200,0.1);}
-  .dash-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:var(--accent2);border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;}
-  .alerta-factura-dup{display:none;padding:8px 14px;background:rgba(243,156,18,0.12);border:1px solid var(--yellow);border-radius:10px;margin-top:6px;font-size:12px;color:var(--yellow);font-weight:600;}
-
-  /* ── FORMULARIO ANIMATE ── */
-  .card:not(.hidden){animation:fadeSlide 0.2s ease;}
-  @keyframes fadeSlide{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  :root { --bg:#0b1220; --panel:#111827; --line:#1f2a3d; --txt:#e5e7eb; --muted:#94a3b8; --cian:#22d3ee; --verde:#4ade80; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font-family: system-ui, Segoe UI, Roboto, sans-serif; min-height:100vh; display:flex; flex-direction:column; }
+  header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); }
+  .titulo { font-weight:800; letter-spacing:3px; color:#67e8f9; font-size:18px; }
+  .acc button { background:none; border:0; color:var(--muted); font-size:18px; cursor:pointer; padding:4px 8px; }
+  .acc button.on { color:var(--verde); }
+  main { flex:1; display:flex; flex-direction:column; padding:14px 18px; gap:12px; max-width:760px; width:100%; margin:0 auto; }
+  .login { display:flex; flex-direction:column; gap:10px; margin-top:30px; }
+  select, input, textarea, button.bt { font:inherit; border-radius:10px; border:1px solid #334155; background:#1e293b; color:var(--txt); padding:12px; }
+  button.bt { background:#1d4ed8; border-color:#1d4ed8; cursor:pointer; font-weight:700; }
+  button.bt.sec { background:#1e293b; border-color:#334155; font-weight:600; }
+  .saludo { font-size:20px; font-weight:700; }
+  .voz { font-size:13px; color:var(--muted); background:var(--panel); }
+  .resp { flex:1; min-height:240px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; white-space:pre-wrap; overflow:auto; line-height:1.5; font-size:15px; }
+  .entrada { display:flex; gap:8px; align-items:flex-end; }
+  .entrada textarea { flex:1; resize:none; min-height:48px; max-height:160px; overflow-y:auto; }
+  .msg { color:#fca5a5; font-size:14px; min-height:18px; }
+  .oculto { display:none !important; }
+  .escucha { box-shadow:0 0 0 4px rgba(34,211,238,.35); }
 </style>
-<script>var SESION_CALC = <?!= JSON.stringify(sesionCalc) ?>;</script>
-<?!= include('JS') ?>
-  <!-- PWA -->
-  <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIkRvbiBBYmVsIMK3IENhbGN1bGFkb3JhIiwKICAic2hvcnRfbmFtZSI6ICJEb24gQWJlbCIsCiAgImRlc2NyaXB0aW9uIjogIkNhbGN1bGFkb3JhIGRlIHByZWNpb3MgRG9uIEFiZWwgwrcgUHVlcnRvIFZhcmFzIiwKICAic3RhcnRfdXJsIjogIi4vIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGEwZDE0IiwKICAidGhlbWVfY29sb3IiOiAiIzFlM2E2ZSIsCiAgIm9yaWVudGF0aW9uIjogInBvcnRyYWl0LXByaW1hcnkiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUI0Yld4dWN6MGlhSFIwY0RvdkwzZDNkeTUzTXk1dmNtY3ZNakF3TUM5emRtY2lJSGRwWkhSb1BTSXhPVElpSUdobGFXZG9kRDBpTVRreUlpQjJhV1YzUW05NFBTSXdJREFnTVRreUlERTVNaUkrQ2lBZ1BHUmxabk0rQ2lBZ0lDQThiR2x1WldGeVIzSmhaR2xsYm5RZ2FXUTlJbUpuSWlCNE1UMGlNQ1VpSUhreFBTSXdKU0lnZURJOUlqRXdNQ1VpSUhreVBTSXhNREFsSWo0S0lDQWdJQ0FnUEhOMGIzQWdiMlptYzJWMFBTSXdKU0lnYzNSNWJHVTlJbk4wYjNBdFkyOXNiM0k2SXpGbE0yRTJaU0l2UGdvZ0lDQWdJQ0E4YzNSdmNDQnZabVp6WlhROUlqRXdNQ1VpSUhOMGVXeGxQU0p6ZEc5d0xXTnZiRzl5T2lNME5EY3lZemdpTHo0S0lDQWdJRHd2YkdsdVpXRnlSM0poWkdsbGJuUStDaUFnUEM5a1pXWnpQZ29nSUR4eVpXTjBJSGRwWkhSb1BTSXhPVElpSUdobGFXZG9kRDBpTVRreUlpQnllRDBpTkRBaUlHWnBiR3c5SW5WeWJDZ2pZbWNwSWk4K0NpQWdQSFJsZUhRZ2VEMGlPVFlpSUhrOUlqRXhOU0lnWm05dWRDMW1ZVzFwYkhrOUlrRnlhV0ZzTEhOaGJuTXRjMlZ5YVdZaUlHWnZiblF0ZDJWcFoyaDBQU0k1TURBaUlHWnZiblF0YzJsNlpUMGlOeklpSUdacGJHdzlJbmRvYVhSbElpQjBaWGgwTFdGdVkyaHZjajBpYldsa1pHeGxJaUJzWlhSMFpYSXRjM0JoWTJsdVp6MGlMVElpUGtSQlBDOTBaWGgwUGdvZ0lEeHlaV04wSUhnOUlqTXlJaUI1UFNJeE1qZ2lJSGRwWkhSb1BTSXhNamdpSUdobGFXZG9kRDBpTkNJZ2NuZzlJaklpSUdacGJHdzlJbkpuWW1Fb01qVTFMREkxTlN3eU5UVXNNQzQwS1NJdlBnbzhMM04yWno0PSIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2Uvc3ZnK3htbCIsCiAgICAgICJwdXJwb3NlIjogImFueSBtYXNrYWJsZSIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhkcFpIUm9QU0kxTVRJaUlHaGxhV2RvZEQwaU5URXlJaUIyYVdWM1FtOTRQU0l3SURBZ05URXlJRFV4TWlJK0NpQWdQR1JsWm5NK0NpQWdJQ0E4YkdsdVpXRnlSM0poWkdsbGJuUWdhV1E5SW1KbklpQjRNVDBpTUNVaUlIa3hQU0l3SlNJZ2VESTlJakV3TUNVaUlIa3lQU0l4TURBbElqNEtJQ0FnSUNBZ1BITjBiM0FnYjJabWMyVjBQU0l3SlNJZ2MzUjViR1U5SW5OMGIzQXRZMjlzYjNJNkl6RmxNMkUyWlNJdlBnb2dJQ0FnSUNBOGMzUnZjQ0J2Wm1aelpYUTlJakV3TUNVaUlITjBlV3hsUFNKemRHOXdMV052Ykc5eU9pTTBORGN5WXpnaUx6NEtJQ0FnSUR3dmJHbHVaV0Z5UjNKaFpHbGxiblErQ2lBZ1BDOWtaV1p6UGdvZ0lEeHlaV04wSUhkcFpIUm9QU0l4T1RJaUlHaGxhV2RvZEQwaU1Ua3lJaUJ5ZUQwaU9EQWlJR1pwYkd3OUluVnliQ2dqWW1jcElpOCtDaUFnUEhSbGVIUWdlRDBpTWpVMklpQjVQU0l6TURBaUlHWnZiblF0Wm1GdGFXeDVQU0pCY21saGJDeHpZVzV6TFhObGNtbG1JaUJtYjI1MExYZGxhV2RvZEQwaU9UQXdJaUJtYjI1MExYTnBlbVU5SWpFNU1pSWdabWxzYkQwaWQyaHBkR1VpSUhSbGVIUXRZVzVqYUc5eVBTSnRhV1JrYkdVaUlHeGxkSFJsY2kxemNHRmphVzVuUFNJdE1pSStSRUU4TDNSbGVIUStDaUFnUEhKbFkzUWdlRDBpT0RBaUlIazlJak0wTUNJZ2QybGtkR2c5SWpNMU1pSWdhR1ZwWjJoMFBTSXhNQ0lnY25nOUlqSWlJR1pwYkd3OUluSm5ZbUVvTWpVMUxESTFOU3d5TlRVc01DNDBLU0l2UGdvOEwzTjJaejQ9IiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfQogIF0KfQ==">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Don Abel">
-  <meta name="theme-color" content="#1e3a6e">
-  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMTkyIDE5MiI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCUiIHkxPSIwJSIgeDI9IjEwMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzFlM2E2ZSIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiM0NDcyYzgiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iNDAiIGZpbGw9InVybCgjYmcpIi8+CiAgPHRleHQgeD0iOTYiIHk9IjExNSIgZm9udC1mYW1pbHk9IkFyaWFsLHNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI5MDAiIGZvbnQtc2l6ZT0iNzIiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBsZXR0ZXItc3BhY2luZz0iLTIiPkRBPC90ZXh0PgogIDxyZWN0IHg9IjMyIiB5PSIxMjgiIHdpZHRoPSIxMjgiIGhlaWdodD0iNCIgcng9IjIiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC40KSIvPgo8L3N2Zz4=">
-  <!-- Service Worker Registration -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        // Inline service worker via blob
-        var swCode = `
-          const CACHE = 'donabel-v1';
-          self.addEventListener('install', e => {
-            self.skipWaiting();
-          });
-          self.addEventListener('activate', e => {
-            e.waitUntil(clients.claim());
-          });
-          self.addEventListener('fetch', e => {
-            // Solo cachear GET requests de la misma origen
-            if (e.request.method !== 'GET') return;
-            e.respondWith(
-              fetch(e.request).catch(() => caches.match(e.request))
-            );
-          });
-        `;
-        var blob = new Blob([swCode], {type: 'application/javascript'});
-        var swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl, {scope: '/'})
-          .catch(function() {}); // silencioso si falla
-      });
-    }
-  </script>
-  <style>
-    .header-logo, .header h1, .header > p, .session-chip, #theme-toggle { display:none !important; }
-    .btn-dashboard.visible { background:var(--accent) !important; color:#fff !important; border-color:var(--accent) !important; padding:12px 22px !important; font-size:14px !important; }
-  </style>
 </head>
 <body>
-<!-- TOGGLE TEMA -->
-<button class="theme-toggle" id="theme-toggle" onclick="toggleTheme()">🌙</button>
+<header>
+  <span class="titulo">JARVIS</span>
+  <span class="acc oculto" id="acc">
+    <button id="b-voz" title="Responder siempre en voz">🔇</button>
+    <button id="b-wake" title="Escuchar la palabra 'Jarvis'">👂</button>
+    <button id="b-mic" title="Hablar una pregunta">🎤</button>
+  </span>
+</header>
 
-<!-- BADGE GUARDADOS -->
-<div class="guardados-badge" id="guardados-badge">✅ <span id="guardados-count">0</span> guardado(s)</div>
+<main>
+  <!-- Ingreso -->
+  <section id="pantalla-login" class="login">
+    <div class="saludo">Ingresa para hablar con Jarvis</div>
+    <select id="login-func"></select>
+    <input type="password" id="login-pin" inputmode="numeric" placeholder="PIN">
+    <button class="bt" id="btn-entrar">Entrar</button>
+    <div class="msg" id="login-msg"></div>
+  </section>
 
-<div class="header">
-  <img src="https://drive.google.com/uc?export=view&id=1xH1d7ZKvdTI5MaU5ka_Yhzw2lCB41y2n" class="header-logo" alt="Don Abel" onerror="this.style.display='none'">
-  <h1>Don <span>Abel</span></h1>
-  <p>Calculadora de precios &middot; Puerto Varas</p>
-  <div class="session-chip" id="session-chip">
-    <span class="chip" id="chip-usuario"><span class="chip-dot"></span><span id="chip-usuario-txt">Sin usuario</span></span>
-    <span class="chip-sep" id="chip-sep1" style="display:none">·</span>
-    <span class="chip" id="chip-proveedor" style="display:none"><span id="chip-prov-txt">—</span></span>
-    <span class="chip-sep" id="chip-sep2" style="display:none">·</span>
-    <span class="chip" id="chip-factura" style="display:none">🧾 <span id="chip-fact-txt">—</span></span>
-  </div>
-  <button class="btn-dashboard" id="btn-dashboard" onclick="toggleDashboard()" style="display:none">📊 Dashboard ADM</button>
-</div>
+  <!-- Conversación -->
+  <section id="pantalla-chat" class="oculto" style="display:flex;flex-direction:column;gap:12px;flex:1">
+    <div class="saludo" id="saludo"></div>
+    <select id="voz" class="voz"></select>
+    <div class="resp" id="resp"></div>
+    <div class="msg" id="msg"></div>
+    <div class="entrada">
+      <textarea id="pregunta" rows="1" placeholder="Escribe o habla… (Enter envía, Shift+Enter salta línea)"></textarea>
+      <button class="bt" id="btn-enviar">Enviar</button>
+    </div>
+  </section>
+</main>
 
-<!-- MENÚ ADM -->
-<div class="adm-menu" id="adm-menu" onclick="if(event.target===this)cerrarMenuAdm()">
-  <div class="adm-menu-box">
-    <div class="adm-menu-title">⚙️ Opciones ADM</div>
-    <button class="adm-menu-btn" onclick="abrirDashboard()">
-      <span class="adm-menu-icon">📊</span>
-      <div><div>Dashboard ADM</div><div class="adm-menu-desc">Facturas, alzas y bajas del período</div></div>
-    </button>
-    <button class="adm-menu-close" onclick="cerrarMenuAdm()">Cancelar</button>
-  </div>
-</div>
+<script>
+  // Dirección de la app de Apps Script (la misma que usa el POS)
+  const API = 'https://script.google.com/macros/s/AKfycbwcNig7G26Th8jJzdpnJkt5Ic8qIMYDtk_6iZ_gUaJxFbpsxRT4mFyd9NfWOdsoGtGU/exec';
 
+  let sesion = null;          // solo en memoria: se pierde al cerrar la página
+  let wakeOn = false, hablando = false, rec = null;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-<div id="dashboard-adm">
-  <div class="card" style="background:linear-gradient(135deg,rgba(30,58,110,0.3),rgba(68,114,200,0.1));border-color:var(--border2)">
-    <div class="dash-header">
-      <div class="dash-title">📊 Dashboard ADM</div>
-      <div class="dash-filtros">
-        <button class="dash-tab active" id="dtab-7"  onclick="cargarDashboard(7,this)">7 días</button>
-        <button class="dash-tab"        id="dtab-30" onclick="cargarDashboard(30,this)">30 días</button>
-        <button class="dash-tab"        id="dtab-1"  onclick="cargarDashboard(1,this)">Hoy</button>
-        <button class="dash-tab" onclick="mostrarRangoCompras()">Rango</button>
-        <button class="dash-tab" onclick="ocultarDashboard()">Cerrar</button>
-      </div>
-    </div>
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '');
 
-        <div id="rango-compras" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 0">
-          <span style="font-size:12px;color:var(--text2)">Desde</span>
-          <input type="date" id="rango-desde" class="form-input" style="width:auto;color-scheme:dark">
-          <span style="font-size:12px;color:var(--text2)">Hasta</span>
-          <input type="date" id="rango-hasta" class="form-input" style="width:auto;color-scheme:dark">
-          <button class="btn-normalizar" style="width:auto" onclick="aplicarRangoCompras()">Aplicar</button>
-        </div>
-    <!-- KPIs -->
-    <div class="dash-kpis" id="dash-kpis">
-      <div class="dash-kpi"><div class="dash-kpi-val" id="kp-prov">—</div><div class="dash-kpi-lbl">Proveedores</div></div>
-      <div class="dash-kpi"><div class="dash-kpi-val" id="kp-prod">—</div><div class="dash-kpi-lbl">Productos activos</div></div>
-      <div class="dash-kpi"><div class="dash-kpi-val" id="kp-neg" style="color:#e74c3c">—</div><div class="dash-kpi-lbl">Stock negativo</div></div>
-      <div class="dash-kpi"><div class="dash-kpi-val" id="kp-bajo" style="color:#f59e0b">—</div><div class="dash-kpi-lbl">Stock bajo mínimo</div></div>
-      <div class="dash-kpi"><div class="dash-kpi-val" id="kp-compras">—</div><div class="dash-kpi-lbl" id="kp-compras-lbl">Compras</div></div>
-    </div>
-    <div style="display:none">
-      <span id="dk-prod"></span><span id="dk-fact"></span><span id="dk-users"></span>
-    </div>
-    </div>
+  // Llamadas a la app de Apps Script. text/plain evita el preflight de CORS.
+  async function llamar(payload) {
+    const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+    return r.json();
+  }
 
-    <div id="dash-loading" style="text-align:center;padding:20px;display:none">
-      <span class="dash-spinner"></span> <span style="font-size:13px;color:var(--text2)">Cargando datos...</span>
-    </div>
+  // ── Ingreso ──
+  async function cargarFuncionarios() {
+    const lista = await (await fetch(API + '?action=jarvisFuncionarios')).json();
+    const sel = $('login-func');
+    sel.innerHTML = '';
+    lista.forEach(f => { const o = document.createElement('option'); o.value = f.id; o.textContent = f.nombre; sel.appendChild(o); });
+  }
+  async function entrar() {
+    $('login-msg').textContent = '';
+    const id = $('login-func').value, pin = $('login-pin').value.trim();
+    if (!id || !pin) { $('login-msg').textContent = 'Elige tu nombre e ingresa el PIN'; return; }
+    try {
+      const r = await llamar({ accion: 'jarvisLogin', id, pin });
+      if (!r.ok) { $('login-msg').textContent = r.error || 'PIN incorrecto'; return; }
+      if (r.funcionario.rol !== 'Admin') { $('login-msg').textContent = 'Jarvis es solo para administradores'; return; }
+      sesion = { id: r.funcionario.id, nombre: r.funcionario.nombre, pin };
+      $('login-pin').value = '';
+      mostrarChat();
+    } catch (e) { $('login-msg').textContent = 'No se pudo conectar: ' + e.message; }
+  }
+  function mostrarChat() {
+    $('pantalla-login').classList.add('oculto');
+    $('pantalla-chat').classList.remove('oculto');
+    $('acc').classList.remove('oculto');
+    const saludo = 'Hola, ' + sesion.nombre + '. ¿En qué te ayudo?';
+    $('saludo').textContent = saludo;
+    $('resp').textContent = '';
+    hablar(saludo, true);
+  }
+  $('btn-entrar').onclick = entrar;
+  $('login-pin').addEventListener('keydown', e => { if (e.key === 'Enter') entrar(); });
 
-    <div id="dash-contenido" style="display:none">
-      <div id="dash-cat-tabs" class="dash-filtros" style="margin-bottom:14px;flex-wrap:wrap"><button class="dash-tab" onclick="mostrarIngresoAdm()">Ingresar factura</button><button class="dash-tab active" data-cat="sec-prov" onclick="mostrarCatDashboard('sec-prov',this)">Compras por proveedor</button><button class="dash-tab" data-cat="sec-comparativo" onclick="mostrarCatDashboard('sec-comparativo',this)">Comparativo de precios</button><button class="dash-tab" data-cat="sec-fichas" onclick="mostrarCatDashboard('sec-fichas',this)">Fichas de proveedor</button><button class="dash-tab" data-cat="sec-margen" onclick="mostrarCatDashboard('sec-margen',this)">Margen mínimo</button><button class="dash-tab" data-cat="sec-codigos" onclick="mostrarCatDashboard('sec-codigos',this)">Revisar códigos</button><button class="dash-tab" data-cat="sec-resumen" onclick="mostrarCatDashboard('sec-resumen',this)">Cajero y semana</button><button class="dash-tab" data-cat="sec-facturas" onclick="mostrarCatDashboard('sec-facturas',this)">Facturas del período</button></div>
-      <!-- Categoría 1: Por proveedor (comparativo, umbral y sugerencia del más barato) -->
-      <!-- Compras por proveedor: monto y cantidad de compras en el periodo -->
-      <div class="dash-section" style="margin-bottom:14px" id="sec-prov">
-        <div class="dash-section-title">🏭 Compras por proveedor</div>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
-          <button class="dash-tab" data-per="30" onclick="cargarResumenCompras(30)">30 días</button>
-          <button class="dash-tab" data-per="90" onclick="cargarResumenCompras(90)">90 días</button>
-          <button class="dash-tab" data-per="365" onclick="cargarResumenCompras(365)">12 meses</button>
-        </div>
-        <div id="dash-compras"></div>
-      </div>
+  // ── Preguntar ──
+  async function preguntar(hablado) {
+    const txt = $('pregunta');
+    const q = txt.value.trim();
+    if (!q) { $('msg').textContent = 'Escribe o di una pregunta.'; return; }
+    $('msg').textContent = '';
+    $('resp').textContent = 'Pensando…';
+    txt.value = ''; txt.style.height = 'auto';
+    try {
+      const r = await llamar({ accion: 'jarvisPreguntar', pregunta: q, cajeroId: sesion.id, pin: sesion.pin });
+      const t = String(r.ok ? r.respuesta : (r.error || 'Jarvis no respondió.')).replace(/\*\*/g, '');
+      $('resp').textContent = t;
+      hablar(t, hablado);
+    } catch (e) { $('resp').textContent = 'Error: ' + e.message; }
+  }
+  $('btn-enviar').onclick = () => preguntar(false);
+  $('pregunta').addEventListener('input', e => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'; });
+  $('pregunta').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); preguntar(false); } });
 
-      <!-- Comparativo de precios entre proveedores (umbral de diferencia) -->
-      <div class="dash-section" style="margin-bottom:14px" id="sec-comparativo">
-        <div class="dash-section-title">⚖️ Comparativo de precios</div>
-        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
-          <button class="btn-normalizar" onclick="cargarComparativoProv()">Cargar comparativo</button>
-          <span style="font-size:12px;color:var(--muted)">Umbral de diferencia de precio:</span>
-          <input type="number" id="dash-umbral" value="5" min="1" max="50"
-            style="width:60px;padding:5px 8px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;text-align:center;outline:none"
-            oninput="renderDashboard(_dashData);renderComparativoProv()">
-          <span style="font-size:12px;color:var(--muted)">%</span>
-        </div>
-        <div id="dash-prov"></div>
-      </div>
+  // ── Voz (respuesta) ──
+  function cargarVoces() {
+    if (!('speechSynthesis' in window)) return;
+    const vs = speechSynthesis.getVoices().filter(v => /^es/i.test(v.lang));
+    const sel = $('voz');
+    sel.innerHTML = '';
+    (vs.length ? vs : []).forEach(v => { const o = document.createElement('option'); o.value = v.name; o.textContent = v.name + ' (' + v.lang + ')'; sel.appendChild(o); });
+    if (!vs.length) { const o = document.createElement('option'); o.textContent = 'Voz por defecto del equipo'; sel.appendChild(o); }
+  }
+  if ('speechSynthesis' in window) { cargarVoces(); speechSynthesis.onvoiceschanged = cargarVoces; }
 
-      <style>
-  .ficha-row { display:grid; grid-template-columns:86px 190px 1fr 28px; gap:8px; align-items:center; margin-bottom:6px; }
-  .ficha-row .ficha-val { width:100%; }
-  .ficha-row .ficha-quitar { background:none; border:none; color:var(--red); font-size:16px; cursor:pointer; }
-  .ficha-metodos { display:flex; gap:12px; flex-wrap:wrap; font-size:13px; }
-  @media (max-width: 640px) { .ficha-row { grid-template-columns:70px 1fr; } .ficha-row .ficha-val { grid-column:1 / -1; } }
-</style>
-<!-- Categoría 2: Fichas de proveedor (crear, copiar estructura, editar) -->
-<div class="dash-section" style="margin-bottom:14px" id="sec-fichas">
-  <div class="dash-section-title">🆕 Fichas Proveedores</div>
-  <div id="fichas-prov" style="display:none">
-    <div id="fichas-actuales" style="margin-bottom:12px"></div>
-    <div id="fichas-lista" style="margin-bottom:12px"></div>
-    <details id="ficha-desplegable" style="border-top:1px solid var(--border);padding-top:12px">
-      <summary style="cursor:pointer;font-size:13px;font-weight:700;margin-bottom:8px">Crear ficha nueva ▾</summary>
-      <div style="font-size:13px;font-weight:700;margin:8px 0" id="ficha-titulo">Nuevo proveedor</div>
-      <input type="hidden" id="ficha-codigo">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
-        <label class="form-label" style="flex:1;min-width:220px">Nombre *
-          <input type="text" id="ficha-nombre" class="form-input" style="margin-top:4px"></label>
-        <label class="form-label" style="flex:1;min-width:220px">Categoría (pestaña de Ingreso)
-          <select id="ficha-categoria" class="form-input" style="margin-top:4px">
-            <option value="alimentos">Alimentos / Bebidas</option>
-            <option value="licores">Cervezas / Licores / Vinos</option>
-          </select></label>
-      </div>
-      <label class="form-label" id="ficha-plantilla-wrap" style="display:block;margin-bottom:10px">Plantilla de ingreso (copia el formulario y reglas de cálculo de) <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">solo al crear un proveedor nuevo</span>
-        <select id="ficha-plantilla" class="form-input" style="margin-top:4px"></select></label>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Cada campo: <b>Sí</b> lo usa este proveedor, <b>No</b> lo oculta. Al copiar de otro proveedor se copian los campos, no sus datos.</div>
-      <div id="ficha-campos"></div>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
-        <input type="text" id="ficha-nuevo-campo" class="form-input" placeholder="Nuevo campo (ej: Horario de entrega)" style="flex:1;min-width:200px">
-        <button class="btn-normalizar" style="width:auto" onclick="agregarCampoFormulario()">+ Agregar campo</button>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
-        <button class="btn-normalizar" style="width:auto" onclick="guardarFichaProv()">💾 Guardar ficha</button>
-        <button class="btn-normalizar" style="width:auto" onclick="limpiarFichaProv()">Nueva en blanco</button>
-        <button class="btn-normalizar" id="btn-activo-ficha" style="width:auto;display:none" onclick="toggleActivoFichaProv()">Desactivar</button>
-        <button class="btn-normalizar" id="btn-eliminar-ficha" style="width:auto;display:none;color:var(--red)" onclick="eliminarFichaProv()">Eliminar</button>
-        <span id="ficha-msg" style="font-size:12px"></span>
-      </div>
-    </details>
-  </div>
-</div>
+  let vozSiempre = false;
+  $('b-voz').onclick = () => { vozSiempre = !vozSiempre; $('b-voz').textContent = vozSiempre ? '🔊' : '🔇'; $('b-voz').classList.toggle('on', vozSiempre); };
 
-<!-- Categoría 3: Margen mínimo por proveedor -->
-      <div class="dash-section" style="margin-bottom:14px" id="sec-margen">
-        <div class="dash-section-title">⚙️ Margen mínimo por proveedor</div>
-        <div id="adm-margenes" style="display:none;margin-bottom:12px"></div>
-      </div>
+  function hablar(t, forzar) {
+    if (!('speechSynthesis' in window) || !(forzar || vozSiempre)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(t);
+    const nombre = $('voz').value;
+    const v = speechSynthesis.getVoices().find(x => x.name === nombre);
+    if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'es-CL'; }
+    hablando = true;
+    if (rec) { try { rec.abort(); } catch (e) {} }
+    u.onend = () => { hablando = false; if (wakeOn) setTimeout(() => arrancar(true), 300); };
+    speechSynthesis.speak(u);
+  }
 
-      <!-- Categoría 3: Revisar códigos con nombres distintos -->
-      <div class="dash-section" style="margin-bottom:14px" id="sec-codigos">
-        <div class="dash-section-title">🔎 Revisar códigos con nombres distintos</div>
-        <div id="adm-codigos" style="display:none"></div>
-      </div>
+  // ── Micrófono: pregunta única (🎤) o palabra "Jarvis" (👂) ──
+  const msgMic = {
+    'not-allowed': 'El navegador no dio permiso para el micrófono. Revisa el candado de la dirección y permite el micrófono.',
+    'service-not-allowed': 'El navegador no dio permiso para el micrófono.',
+    'audio-capture': 'No encuentro un micrófono conectado.',
+    'no-speech': 'No escuché nada. Intenta de nuevo.',
+    'network': 'Sin conexión para dictar.'
+  };
+  function arrancar(continuo) {
+    if (!SR) { $('msg').textContent = 'Este navegador no permite dictar.'; return; }
+    if (rec) return;
+    const r = new SR();
+    r.lang = 'es-CL'; r.continuous = continuo; r.interimResults = false; r.maxAlternatives = 1;
+    rec = r;
+    $('b-mic').classList.add('escucha');
+    r.onresult = ev => {
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        if (!ev.results[i].isFinal) continue;
+        const t = ev.results[i][0].transcript;
+        if (!wakeOn) { $('pregunta').value = t; preguntar(true); continue; }
+        const norm = t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w\sñ]/g, ' ').replace(/\s+/g, ' ').trim();
+        const m = /\b(jarvis|yarvis|harvis|jarbis)\b/.exec(norm);
+        if (!m) continue;
+        const resto = norm.slice(m.index + m[0].length).trim();
+        if (!resto) { mostrarSaludoWake(); continue; }
+        $('pregunta').value = resto; preguntar(true);
+      }
+    };
+    r.onerror = ev => {
+      if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(ev.error)) { wakeOn = false; pintarBotones(); }
+      $('msg').textContent = msgMic[ev.error] || ('No te escuché (' + ev.error + ').');
+    };
+    r.onend = () => {
+      rec = null;
+      $('b-mic').classList.remove('escucha');
+      if (wakeOn && !hablando) setTimeout(() => arrancar(true), 300);
+    };
+    try { r.start(); } catch (e) { rec = null; $('b-mic').classList.remove('escucha'); }
+  }
+  function mostrarSaludoWake() { hablar('Hola, ' + sesion.nombre + '. ¿En qué te ayudo?', true); }
+  function pintarBotones() {
+    $('b-wake').classList.toggle('on', wakeOn);
+    $('b-wake').style.color = wakeOn ? 'var(--verde)' : '';
+  }
+  $('b-mic').onclick = () => { if (rec) { rec.stop(); return; } $('msg').textContent = 'Escuchando… habla ahora.'; arrancar(false); };
+  $('b-wake').onclick = () => {
+    wakeOn = !wakeOn; pintarBotones();
+    if (rec) rec.stop();
+    if (wakeOn) { $('msg').textContent = 'Escuchando la palabra "Jarvis"… di "Hola Jarvis" o "Jarvis, dame el precio de…".'; arrancar(true); }
+    else $('msg').textContent = '';
+  };
 
-      <!-- Resumen de ingreso: cajero y semana -->
-      <div class="dash-section" id="sec-resumen">
-        <div class="dash-section-title">📊 Resumen de ingreso: cajero y semana</div>
-        <div id="dash-categorias"></div>
-      </div>
-
-      <!-- Facturas expandibles -->
-      <div class="dash-section" id="sec-facturas">
-        <div class="dash-section-title">🧾 Facturas del período</div>
-        <div id="dash-facturas"></div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- INGRESO DE FACTURAS (se oculta cuando el Admin está en el Dashboard) -->
-<div id="ingreso-wrap">
-<!-- ALERTA PROVEEDORES SIN PEDIDO -->
-<div id="alertas-sin-pedido" style="display:none"></div>
-
-<!-- USUARIO -->
-<div class="card" id="card-usuario">
-  <div class="card-title">&#x1F464; &iquest;Qui&eacute;n eres?</div>
-  <div class="user-grid" id="user-grid"></div>
-  <div id="user-logueado" style="display:none;margin-top:8px;font-size:13px;font-weight:700;color:var(--accent2)"></div>
-</div>
-
-<!-- PROVEEDOR -->
-<div class="card">
-  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px"><button class="btn-dashboard" onclick="abrirDashboard()" style="display:inline-flex;white-space:nowrap">← Volver</button><div style="font-size:24px;font-weight:800;text-align:center;flex:1">&#x1F3ED; Proveedor</div><span style="width:90px"></span></div>
-  <div class="prov-tabs">
-    <button class="prov-tab active" id="ptab-alimentos" onclick="selProvTab('alimentos',this)">&#x1F4E6; Alimentos / Bebidas</button>
-    <button class="prov-tab" id="ptab-licores" onclick="selProvTab('licores',this)">&#x1F37A; Cervezas / Licores / Vinos</button>
-  </div>
-  <div class="prov-tab-content active" id="provtab-alimentos">
-    <div id="prov-personal-alimentos" style="display:none;margin-bottom:10px"></div>
-    <div class="prov-sub">
-      <button class="prov-btn" id="pbtn-Mayorista"  onclick="selProveedor('Mayorista')"  data-tooltip="Precio costo con IVA incluido">&#x1F6D2; Central Mayorista</button>
-      <button class="prov-btn" id="pbtn-SurPartner" onclick="selProveedor('SurPartner')" data-tooltip="V.Unit neto + descuento + IABA + IVA">&#x1F4E6; SurPartner</button>
-      <button class="prov-btn" id="pbtn-Evercrisp"  onclick="selProveedor('Evercrisp')"  data-tooltip="Precio neto unitario + IVA 19%">&#x1F954; Evercrisp</button>
-      <button class="prov-btn" id="pbtn-Colun"      onclick="selProveedor('Colun')"      data-tooltip="Monto neto línea + IVA ÷ cant">&#x1F95B; Colun</button>
-      <button class="prov-btn" id="pbtn-Savory"     onclick="selProveedor('Savory')"     data-tooltip="Precio caja neto + IVA ÷ unidades">&#x1F366; Savory</button>
-      <button class="prov-btn" id="pbtn-MarcoPolo"  onclick="selProveedor('MarcoPolo')"  data-tooltip="Neto unitario + IVA 19%">&#x1F9C6; Marco Polo</button>
-      <button class="prov-btn" id="pbtn-Llanquihue" onclick="selProveedor('Llanquihue')" data-tooltip="Cecinas Llanquihue · neto línea + IVA ÷ cant">&#x1F969; Llanquihue</button>
-      <button class="prov-btn" id="pbtn-HN"         onclick="selProveedor('HN')"         data-tooltip="Valor línea neto + IVA ÷ cant">&#x1F3EA; HN</button>
-      <button class="prov-btn" id="pbtn-CCBebidas"  onclick="selProveedor('CCBebidas')"  data-tooltip="Neto + flete + adicional + IVA ÷ cant">&#x1F964; Coca-Cola Bebidas</button>
-      <button class="prov-btn" id="pbtn-Agrosuper"  onclick="selProveedor('Agrosuper')"  data-tooltip="Valor neto línea ÷ cant × 1.19">&#x1F357; Agrosuper</button>
-      <button class="prov-btn" id="pbtn-Lindemann"  onclick="selProveedor('Lindemann')"  data-tooltip="Cecinas Lindemann · neto total + IVA ÷ cant">&#x1F969; Lindemann</button>
-      <button class="prov-btn" id="pbtn-Castano"    onclick="selProveedor('Castano')"    data-tooltip="Valor línea ÷ cant × 1.19">🍔 Castaño</button>
-    </div>
-  </div>
-  <div class="prov-tab-content" id="provtab-licores">
-    <div id="prov-personal-licores" style="display:none;margin-bottom:10px"></div>
-    <div class="prov-sub">
-      <button class="prov-btn" id="pbtn-CCCervezas"   onclick="selProveedor('CCCervezas')"   data-tooltip="Neto + flete + ILA 20.5% + IVA ÷ cant">&#x1F37A; CC Cervezas</button>
-      <button class="prov-btn" id="pbtn-CCLicores"    onclick="selProveedor('CCLicores')"    data-tooltip="Neto + flete + ILA 31.5% + IVA ÷ cant">&#x1F943; CC Licores</button>
-      <button class="prov-btn" id="pbtn-Bordelago"    onclick="selProveedor('Bordelago')"    data-tooltip="Total factura ÷ unidades">&#x1F37A; Bordelago</button>
-      <button class="prov-btn" id="pbtn-Chester"      onclick="selProveedor('Chester')"      data-tooltip="Total factura ÷ unidades totales">&#x1F37B; Chester</button>
-      <button class="prov-btn" id="pbtn-Bosques"      onclick="selProveedor('Bosques')"      data-tooltip="Rescate Brebajes · ILA 20.5% + costos fijos">&#x1F33F; Bosques</button>
-      <button class="prov-btn" id="pbtn-C860"         onclick="selProveedor('C860')"         data-tooltip="Cervecera Totoral · ILA 20.5% + fijos">&#x26F0;&#xFE0F; 860</button>
-      <button class="prov-btn" id="pbtn-MadCharlies"  onclick="selProveedor('MadCharlies')"  data-tooltip="Brebajes Valdivia · ILA 20.5% o IABA 10%">&#x1F43A; Mad Charlies</button>
-      <button class="prov-btn" id="pbtn-Plagemann"    onclick="selProveedor('Plagemann')"    data-tooltip="Cervezas Plagemann · total ÷ unidades">&#x1F3FB; Plagemann</button>
-      <button class="prov-btn" id="pbtn-MiguelTorres" onclick="selProveedor('MiguelTorres')" data-tooltip="Vinos ILA 20.5% / Licores ILA 31.5% + IVA">&#x1F377; Miguel Torres</button>
-      <button class="prov-btn" id="pbtn-Carancho"     onclick="selProveedor('Carancho')"     data-tooltip="Pisco Sour Carancho · valor ÷ cant × 1.19">&#x1F379; Carancho</button>
-      <button class="prov-btn" id="pbtn-Casawer"      onclick="selProveedor('Casawer')"      data-tooltip="Pisco Sour Casawer · valor ÷ cant × 1.19">&#x1F379; Casawer</button>
-      <button class="prov-btn" id="pbtn-Jester" onclick="selProveedor('Jester')" data-tooltip="Hutchings y Ricci · ILA 20.5% solo cerveza + IVA sobre cerveza+logística">🎭 Jester</button>
-    </div>
-  </div>
-
-  <!-- N Factura global obligatorio -->
-  <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
-    <label class="form-label" style="color:var(--accent2)">
-      &#x1F9FE; N&deg; Factura
-      <span style="color:var(--red);font-size:13px;margin-left:2px">*</span>
-      <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px;margin-left:4px">obligatorio &mdash; se guarda en todas las filas</span>
-    </label>
-    <input type="text" id="nfactura" class="form-input"
-      placeholder="Ej: 12345" inputmode="numeric"
-      style="border-color:var(--accent);margin-top:6px"
-      oninput="actualizarBannerFactura()" onblur="verificarFacturaDuplicada()">
-    <div class="alerta-factura-dup" id="alerta-factura-dup">⚠️ Este N° de factura ya fue registrado anteriormente. Verifica que no sea un duplicado.</div>
-    <div id="banner-factura" style="display:none;margin-top:8px;padding:9px 14px;background:rgba(68,114,200,0.12);border:1px solid var(--accent);border-radius:10px;font-size:12px;color:var(--accent2);font-weight:600">
-      &#x1F4CB; Factura N&deg; <span id="banner-nfactura-num"></span> &mdash; todos los productos se guardar&aacute;n con este n&uacute;mero
-    </div>
-    <!-- Fecha y monto de la factura: alimentan el resumen de compras por proveedor -->
-    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
-      <div style="flex:1;min-width:140px">
-        <label class="form-label">Fecha factura</label>
-        <input type="date" id="fact-fecha" class="form-input" style="margin-top:6px;height:48px;box-sizing:border-box">
-      </div>
-      <div style="flex:1;min-width:140px">
-        <label class="form-label">Monto total factura</label>
-        <div class="input-money-wrap" style="margin-top:6px"><input type="text" id="fact-monto" class="form-input" style="height:48px;box-sizing:border-box" inputmode="numeric" autocomplete="off" placeholder="Ej: $150.000" oninput="formatMoneyInput(this)"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- FORMULARIO MAYORISTA -->
-<div class="card hidden" id="form-mayorista">
-  <div class="card-title">
-    <span class="badge badge-mayorista">Mayorista</span>
-    &nbsp;Ingreso de producto
-  </div>
-  <div class="form-group">
-    <label class="form-label">Código de barras</label>
-    <input type="text" id="cod-barras" class="form-input" placeholder="Escanea o escribe el código"
-      oninput="actualizarLinkMayorista();if(this.value.trim().length>=8)buscarHistorialMayorista();" onblur="buscarHistorialMayorista()" inputmode="numeric">
-  </div>
-  <a id="link-cm" href="#" target="_blank" class="link-mayorista hidden">
-    🔍 <span>Buscar en Central Mayorista</span>
-  </a>
-  <div class="form-group">
-    <label class="form-label">Nombre del producto</label>
-    <input type="text" id="nombre-m" class="form-input" placeholder="Nombre del producto">
-  </div>
-  <div class="form-group">
-    <label class="form-label">Precio costo (con IVA)</label>
-    <div class="input-money-wrap"><input type="text" id="costo-m" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $1.500" oninput="formatMoneyInput(this);calcularMayorista()"></div>
-  </div>
-  <div class="form-group">
-    <label class="form-label">Cantidad comprada <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">para cuadrar la factura</span></label>
-    <input type="number" id="cant-may" class="form-input" placeholder="Ej: 12" inputmode="numeric" min="1" onchange="_scrollAMargenesSiListo()">
-  </div>
-  <div class="form-group">
-    <label class="form-label">¿Es Cerveza en PACK? <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">activa opción de pack</span></label>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button type="button" id="pack-no-may" onclick="setPackMAY(false)"
-        style="padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s">
-        🥤 No
-      </button>
-      <button type="button" id="pack-si-may" onclick="setPackMAY(true)"
-        style="padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s">
-        🍺 Sí, es cerveza en PACK
-      </button>
-    </div>
-  </div>
-  <input type="hidden" id="toggle-pack-may" value="">
-  <div class="hidden" id="grupo-pack-may">
-    <div class="row-2">
-      <div class="form-group">
-        <label class="form-label">Unidades por pack</label>
-        <input type="number" id="pack-may" class="form-input" placeholder="Ej: 6" inputmode="numeric" oninput="calcularMayorista()">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Código de barra pack</label>
-        <input type="text" id="cod-pack-may" class="form-input" placeholder="Ej: 7802130002274" inputmode="numeric">
-      </div>
-    </div>
-  </div>
-  <div id="hist-mayorista"></div>
-  <div id="alerta-m" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Mayorista">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO SURPARTNER -->
-<div class="card hidden" id="form-surpartner">
-  <div class="card-title">
-    <span class="badge badge-surpartner">SurPartner</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Código de barra</label>
-      <input type="text" id="cod-sp" class="form-input" placeholder="Ej: 6971549920026" inputmode="numeric" oninput="if(this.value.trim().length>=8)buscarHistorialSurPartner();" onblur="buscarHistorialSurPartner()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nombre del producto</label>
-      <input type="text" id="nombre-sp" class="form-input" placeholder="Nombre del producto">
-    </div>
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">V.Unit factura ($) <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">neto s/IVA</span></label>
-      <div class="input-money-wrap"><input type="text" id="vunit-sp" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $793" oninput="formatMoneyInput(this);calcularCostoRealSP()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Descuento % (si aplica)</label>
-      <input type="text" id="desc-sp" class="form-input" inputmode="numeric" autocomplete="off" placeholder="$0" oninput="formatMoneyInput(this);calcularCostoRealSP()">
-    </div>
-  </div>
-  <div class="form-group">
-    <label class="form-label">Impuesto adicional (IABA)</label>
-    <div class="iaba-select-wrap">
-      <select class="iaba-select" id="iaba-sp" onchange="calcularCostoRealSP()">
-        <option value="0">Sin IABA — productos normales</option>
-        <option value="10">IABA 10% — Agua Oye, Score, jugos con sabor</option>
-        <option value="18">IABA 18% — Bebidas azucaradas (Coca-Cola, Fanta...)</option>
-      </select>
-    </div>
-  </div>
-  <div class="toggle-row">
-    <span class="toggle-label">¿Es por display? (dividir entre unidades)</span>
-    <label class="toggle">
-      <input type="checkbox" id="toggle-display" onchange="toggleDisplay()">
-      <span class="toggle-slider"></span>
-    </label>
-  </div>
-  <div class="form-group hidden" id="grupo-display">
-    <label class="form-label">Unidades por display</label>
-    <input type="number" id="unidades-sp" class="form-input" placeholder="Ej: 24" inputmode="numeric" oninput="calcularCostoRealSP()">
-  </div>
-  <div class="form-group">
-    <label class="form-label">Cantidad total comprada <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">para cuadrar factura</span></label>
-    <input type="number" id="cant-sp" class="form-input" placeholder="Ej: 24" inputmode="numeric" min="1">
-  </div>
-  <div class="costo-real-box" id="costo-real-box">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor">$0</div>
-    <div class="desglose" id="desglose-sp">
-      <div class="desglose-row"><span>V.Unit neto</span><span id="d-neto">—</span></div>
-      <div class="desglose-row" id="d-row-desc" style="display:none"><span>Descuento</span><span id="d-desc">—</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="d-iva">—</span></div>
-      <div class="desglose-row" id="d-row-iaba" style="display:none"><span id="d-iaba-label">+ IABA 10%</span><span id="d-iaba">—</span></div>
-      <div class="desglose-row" id="d-row-display" style="display:none"><span id="d-display-label">÷ display</span><span id="d-display">—</span></div>
-      <div class="desglose-row total"><span>Costo real/u</span><span id="d-total">—</span></div>
-    </div>
-  </div>
-  <div id="hist-surpartner"></div>
-  <div id="alerta-sp" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-SurPartner">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO EVERCRISP -->
-<div class="card hidden" id="form-evercrisp">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(34,197,94,0.2);color:var(--green)">Evercrisp</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Código de barra</label>
-      <input type="text" id="cod-ev" class="form-input" placeholder="Ej: 300065401" inputmode="numeric" oninput="if(this.value.trim().length>=8)buscarHistorialEvercrisp();" onblur="buscarHistorialEvercrisp()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nombre del producto</label>
-      <input type="text" id="nombre-ev" class="form-input" placeholder="Ej: Lays Taco 160G">
-    </div>
-  </div>
-  <div class="form-group">
-    <label class="form-label">Precio unitario ($) <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">neto s/IVA</span></label>
-    <div class="input-money-wrap"><input type="text" id="precio-ev" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $1.635" oninput="formatMoneyInput(this);calcularCostoRealEV()"></div>
-  </div>
-  <div class="form-group">
-    <label class="form-label">Cantidad total comprada <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">para cuadrar factura</span></label>
-    <input type="number" id="cant-ev" class="form-input" placeholder="Ej: 24" inputmode="numeric" min="1">
-  </div>
-  <div class="costo-real-box" id="costo-real-box-ev" style="border-color:var(--green);display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-ev" style="color:var(--green)">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Precio unit. neto</span><span id="ev-d-neto">—</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="ev-d-iva">—</span></div>
-      <div class="desglose-row total" style="color:var(--green)"><span>Costo real/u</span><span id="ev-d-real">—</span></div>
-    </div>
-  </div>
-  <div id="hist-evercrisp"></div>
-  <div id="alerta-ev" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Evercrisp">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO COCA-COLA BEBIDAS -->
-<!-- ── AGROSUPER ─────────────────────────────────────── -->
-<div class="card hidden" id="form-agrosuper">
-  <div class="form-header"><span class="prov-badge" style="background:rgba(249,115,22,0.15);color:#f97316;border-color:#f97316">🍗 AGROSUPER</span><span class="form-sub">INGRESO DESDE FACTURA</span></div>
-  <div class="form-row">
-    <div class="form-group">
-      <label class="form-label">CÓDIGO DE BARRA</label>
-      <input type="text" id="cod-agro" class="form-input" placeholder="Ej: 1013173" inputmode="numeric" autocomplete="off"
-        oninput="if(this.value.trim().length>=6)buscarHistorialAgrosuper();"
-        onblur="buscarHistorialAgrosuper()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">NOMBRE DEL PRODUCTO</label>
-      <input type="text" id="nombre-agro" class="form-input" placeholder="Ej: Pech Desh Cong 750g">
-    </div>
-  </div>
-  <div class="form-group">
-    <label class="form-label">VALOR NETO LÍNEA <span class="form-hint">columna VALOR de la factura</span></label>
-    <div class="input-money-wrap">
-      <span class="input-money-prefix">$</span>
-      <input type="text" id="valor-agro" oninput="formatMoneyInput(this)" class="form-input" placeholder="Ej: $37.560" inputmode="numeric" autocomplete="off"
-        oninput="fmtMoney(this);calcularCostoRealAgro()">
-    </div>
-  </div>
-  <div class="form-group">
-    <label class="form-label">CANTIDAD <span class="form-hint">unidades compradas</span></label>
-    <input type="number" id="cant-agro" class="form-input" placeholder="Ej: 10" inputmode="numeric" min="1"
-      oninput="calcularCostoRealAgro()">
-  </div>
-  <div class="costo-real-box hidden" id="costo-real-box-agro">
-    <div class="costo-real-label">COSTO REAL POR UNIDAD</div>
-    <div class="costo-real-valor" id="costo-real-valor-agro">$0</div>
-    <div class="costo-real-detalle">
-      <div class="det-row"><span>Valor neto línea</span><span id="agro-d-valor">$0</span></div>
-      <div class="det-row"><span>÷ <span id="agro-d-cant-label">cantidad</span></span><span id="agro-d-unit">$0</span></div>
-      <div class="det-row"><span>+ IVA 19%</span><span id="agro-d-iva">$0</span></div>
-      <div class="det-row det-total"><span>Costo real/u</span><span id="agro-d-real">$0</span></div>
-    </div>
-  </div>
-  <div id="hist-agro" class="historial-wrap"></div>
-  <div id="alerta-agro" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Agrosuper">🔄 Nuevo producto</button>
-</div>
-
-<div class="card hidden" id="form-ccbebidas">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(248,113,113,0.2);color:#f87171">Coca-Cola Bebidas</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Código de barra</label>
-      <input type="text" id="cod-ccb" class="form-input" placeholder="Ej: 1966" inputmode="numeric" oninput="if(this.value.trim().length>=4)buscarHistorialCCB();" onblur="buscarHistorialCCB()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Producto</label>
-      <input type="text" id="nombre-ccb" class="form-input" placeholder="Ej: Monster Ultra X06">
-    </div>
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Neto Total ($)</label>
-      <div class="input-money-wrap"><input type="text" id="neto-ccb" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $7.715" oninput="formatMoneyInput(this);calcularCostoRealCCB()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Flete Total ($)</label>
-      <div class="input-money-wrap"><input type="text" id="flete-ccb" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $1.569" oninput="formatMoneyInput(this);calcularCostoRealCCB()"></div>
-    </div>
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Adicional ($)</label>
-      <div class="input-money-wrap"><input type="text" id="adicional-ccb" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $499" oninput="formatMoneyInput(this);calcularCostoRealCCB()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Cantidad (unidades)</label>
-      <input type="number" id="cant-ccb" class="form-input" placeholder="Ej: 6" inputmode="numeric" oninput="calcularCostoRealCCB()">
-    </div>
-  </div>
-  <div class="costo-real-box" id="costo-real-box-ccb" style="border-color:#f87171;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-ccb" style="color:#f87171">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Neto Total</span><span id="ccb-d-neto">—</span></div>
-      <div class="desglose-row"><span>+ Flete</span><span id="ccb-d-flete">—</span></div>
-      <div class="desglose-row"><span>+ Adicional (IABA)</span><span id="ccb-d-adicional">—</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="ccb-d-iva">—</span></div>
-      <div class="desglose-row"><span>= Total línea</span><span id="ccb-d-totallinea">—</span></div>
-      <div class="desglose-row"><span id="ccb-d-cant-label">÷ unidades</span><span id="ccb-d-cant">—</span></div>
-      <div class="desglose-row total" style="color:#f87171"><span>Costo real/u</span><span id="ccb-d-real">—</span></div>
-    </div>
-  </div>
-  <div id="hist-ccbebidas"></div>
-  <div id="alerta-ccb" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-CCBebidas">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO COCA-COLA CERVEZAS -->
-<div class="card hidden" id="form-cccervezas">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(251,146,60,0.2);color:#fb923c">Coca-Cola Cervezas</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Código de barra</label>
-      <input type="text" id="cod-ccc" class="form-input" placeholder="Ej: 9407" inputmode="numeric" oninput="if(this.value.trim().length>=4)buscarHistorialCCC();" onblur="buscarHistorialCCC()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Producto</label>
-      <input type="text" id="nombre-ccc" class="form-input" placeholder="Ej: Stella Artois X12 660cc">
-    </div>
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Neto Total ($)</label>
-      <div class="input-money-wrap"><input type="text" id="neto-ccc" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $7.715" oninput="formatMoneyInput(this);calcularCostoRealCCC()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Flete Total ($)</label>
-      <div class="input-money-wrap"><input type="text" id="flete-ccc" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $1.816" oninput="formatMoneyInput(this);calcularCostoRealCCC()"></div>
-    </div>
-  </div>
-  <div class="form-group">
-    <label class="form-label">Cantidad (unidades)</label>
-    <input type="number" id="cant-ccc" class="form-input" placeholder="Ej: 12" inputmode="numeric" oninput="calcularCostoRealCCC()">
-  </div>
-  <div class="costo-real-box" id="costo-real-box-ccc" style="border-color:#fb923c;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-ccc" style="color:#fb923c">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Neto Total</span><span id="ccc-d-neto">-</span></div>
-      <div class="desglose-row"><span>+ Flete</span><span id="ccc-d-flete">-</span></div>
-      <div class="desglose-row"><span>+ ILA 20.5%</span><span id="ccc-d-ila">-</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="ccc-d-iva">-</span></div>
-      <div class="desglose-row"><span>= Total linea</span><span id="ccc-d-total">-</span></div>
-      <div class="desglose-row total" style="color:#fb923c"><span>Costo real/u</span><span id="ccc-d-real">-</span></div>
-    </div>
-  </div>
-  <div class="form-group" style="margin-top:8px">
-    <label class="form-label">¿Se vende también en pack? <span style="color:var(--red);font-size:13px">*</span></label>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button type="button" id="pack-no-btn" onclick="setPackCCC(false)"
-        style="padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s">✗ NO</button>
-      <button type="button" id="pack-si-btn" onclick="setPackCCC(true)"
-        style="padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s">✓ SÍ</button>
-    </div>
-  </div>
-  <input type="hidden" id="toggle-pack-ccc" value="">
-  <div class="hidden" id="grupo-pack-ccc">
-    <div class="row-2">
-      <div class="form-group">
-        <label class="form-label">Unidades por pack</label>
-        <input type="number" id="pack-ccc" class="form-input" placeholder="Ej: 6" inputmode="numeric" oninput="calcularCostoRealCCC()">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Código de barra pack</label>
-        <input type="text" id="cod-pack-ccc" class="form-input" placeholder="Ej: 7802130002274" inputmode="numeric">
-      </div>
-    </div>
-  </div>
-  <div id="hist-cccervezas"></div>
-  <div id="alerta-ccc" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-CCCervezas">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO COCA-COLA LICORES -->
-<div class="card hidden" id="form-cclicores">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(192,132,252,0.2);color:#c084fc">Coca-Cola Licores</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Código de barra</label>
-      <input type="text" id="cod-ccl" class="form-input" placeholder="Ej: 9507" inputmode="numeric" oninput="if(this.value.trim().length>=4)buscarHistorialCCL();" onblur="buscarHistorialCCL()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Producto</label>
-      <input type="text" id="nombre-ccl" class="form-input" placeholder="Ej: Alto del Carmen X01 750cc">
-    </div>
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Neto Total ($)</label>
-      <div class="input-money-wrap"><input type="text" id="neto-ccl" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $4.464" oninput="formatMoneyInput(this);calcularCostoRealCCL()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Flete Total ($)</label>
-      <div class="input-money-wrap"><input type="text" id="flete-ccl" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $172" oninput="formatMoneyInput(this);calcularCostoRealCCL()"></div>
-    </div>
-  </div>
-  <div class="form-group">
-    <label class="form-label">Cantidad (unidades)</label>
-    <input type="number" id="cant-ccl" class="form-input" placeholder="Ej: 1" inputmode="numeric" oninput="calcularCostoRealCCL()">
-  </div>
-  <div class="costo-real-box" id="costo-real-box-ccl" style="border-color:#c084fc;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-ccl" style="color:#c084fc">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Neto Total</span><span id="ccl-d-neto">-</span></div>
-      <div class="desglose-row"><span>+ Flete</span><span id="ccl-d-flete">-</span></div>
-      <div class="desglose-row"><span>+ ILA 31.5%</span><span id="ccl-d-ila">-</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="ccl-d-iva">-</span></div>
-      <div class="desglose-row"><span>= Total linea</span><span id="ccl-d-total">-</span></div>
-      <div class="desglose-row total" style="color:#c084fc"><span>Costo real/u</span><span id="ccl-d-real">-</span></div>
-    </div>
-  </div>
-  <div id="hist-cclicores"></div>
-  <div id="alerta-ccl" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-CCLicores">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO BORDELAGO -->
-<div class="card hidden" id="form-bordelago">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(161,98,7,0.2);color:#ca8a04">Bordelago</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="form-group">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-      <label class="form-label" style="margin-bottom:0">Producto</label>
-      <button type="button" onclick="toggleEditNombreBord()"
-        style="font-size:11px;color:var(--accent2);background:none;border:none;cursor:pointer;font-family:Syne,sans-serif;font-weight:600">✏️ Modificar nombre</button>
-    </div>
-    <div id="nombre-bord-display"
-      style="padding:12px 16px;background:var(--surface2);border:2px solid var(--border);border-radius:var(--radius);color:var(--text2);font-size:14px;font-weight:500">
-      Cerveza Bordelago Lata 473cc
-    </div>
-    <input type="text" id="nombre-bord" class="form-input hidden" placeholder="Nombre del producto" value="Cerveza Bordelago Lata 473cc" style="margin-top:8px">
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Total factura ($)</label>
-      <div class="input-money-wrap"><input type="text" id="total-bord" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $76.396" oninput="formatMoneyInput(this);calcularCostoRealBord()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Total unidades</label>
-      <input type="number" id="cant-bord" class="form-input" placeholder="Ej: 31" inputmode="numeric" oninput="calcularCostoRealBord()">
-    </div>
-  </div>
-  <div class="costo-real-box" id="costo-real-box-bord" style="border-color:#ca8a04;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-bord" style="color:#ca8a04">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Total factura</span><span id="bord-d-total">—</span></div>
-      <div class="desglose-row"><span id="bord-d-cant-label">÷ unidades</span><span id="bord-d-cant">—</span></div>
-      <div class="desglose-row total" style="color:#ca8a04"><span>Costo real/u</span><span id="bord-d-real">—</span></div>
-    </div>
-  </div>
-  <div id="hist-bordelago"></div>
-  <div id="alerta-bord" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Bordelago">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO COLUN -->
-<div class="card hidden" id="form-colun">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(96,165,250,0.2);color:#60a5fa">Colun</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Código de barra</label>
-      <input type="text" id="cod-col" class="form-input" placeholder="Ej: 7802810031020" inputmode="numeric" oninput="if(this.value.trim().length>=8)buscarHistorialColun();" onblur="buscarHistorialColun()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nombre del producto</label>
-      <input type="text" id="nombre-col" class="form-input" placeholder="Ej: Mantequilla Colun 125g">
-    </div>
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Monto Neto ($)</label>
-      <div class="input-money-wrap"><input type="text" id="neto-col" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $8.831" oninput="formatMoneyInput(this);calcularCostoRealCol()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Cantidad (unidades)</label>
-      <input type="number" id="cant-col" class="form-input" placeholder="Ej: 8" inputmode="numeric" oninput="calcularCostoRealCol()">
-    </div>
-  </div>
-  <div class="costo-real-box" id="costo-real-box-col" style="border-color:#60a5fa;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-col" style="color:#60a5fa">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Monto Neto línea</span><span id="col-d-neto">—</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="col-d-iva">—</span></div>
-      <div class="desglose-row"><span id="col-d-cant-label">÷ unidades</span><span id="col-d-cant">—</span></div>
-      <div class="desglose-row total" style="color:#60a5fa"><span>Costo real/u</span><span id="col-d-real">—</span></div>
-    </div>
-  </div>
-  <div id="hist-colun"></div>
-  <div id="alerta-col" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Colun">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO CASTAÑO -->
-<div class="card hidden" id="form-castano">
-  <div class="card-title">
-    <span class="badge" id="form-prov-badge" style="background:rgba(180,83,9,0.2);color:#b45309">Castaño</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Código de barra</label>
-      <input type="text" id="cod-cast" class="form-input" placeholder="Ej: 7802810031020" inputmode="numeric" oninput="if(this.value.trim().length>=8)buscarHistorialCastano();" onblur="buscarHistorialCastano()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nombre del producto</label>
-      <input type="text" id="nombre-cast" class="form-input" placeholder="Ej: Hamburguesa Brioche XL">
-    </div>
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Valor total producto ($)</label>
-      <div class="input-money-wrap"><input type="text" id="valor-cast" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $14.256" oninput="formatMoneyInput(this);calcularCostoRealCastano()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Cantidad (unidades)</label>
-      <input type="number" id="cant-cast" class="form-input" placeholder="Ej: 6" inputmode="numeric" oninput="calcularCostoRealCastano()">
-    </div>
-  </div>
-  <div class="costo-real-box" id="costo-real-box-cast" style="border-color:#b45309;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-cast" style="color:#b45309">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Valor total línea</span><span id="cast-d-neto">—</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="cast-d-iva">—</span></div>
-      <div class="desglose-row"><span id="cast-d-cant-label">÷ unidades</span><span id="cast-d-cant">—</span></div>
-      <div class="desglose-row total" style="color:#b45309"><span>Costo real/u</span><span id="cast-d-real">—</span></div>
-    </div>
-  </div>
-  <div id="hist-castano"></div>
-  <div id="alerta-cast" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Castano">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO SAVORY -->
-<div class="card hidden" id="form-savory">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(244,114,182,0.2);color:#f472b6">Savory</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Código de barra</label>
-      <input type="text" id="cod-sav" class="form-input" placeholder="Ej: 7891000419311" inputmode="numeric" oninput="if(this.value.trim().length>=8)buscarHistorialSavory();" onblur="buscarHistorialSavory()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nombre del producto</label>
-      <input type="text" id="nombre-sav" class="form-input" placeholder="Ej: Savory Centella 26x52g">
-    </div>
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Precio Unit caja ($) <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">neto s/IVA</span></label>
-      <div class="input-money-wrap"><input type="text" id="precio-sav" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $6.032" oninput="formatMoneyInput(this);calcularCostoRealSav()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Unidades por caja</label>
-      <input type="number" id="cant-sav" class="form-input" placeholder="Ej: 26" inputmode="numeric" oninput="calcularCostoRealSav()">
-    </div>
-  </div>
-  <div class="costo-real-box" id="costo-real-box-sav" style="border-color:#f472b6;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-sav" style="color:#f472b6">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Precio caja neto</span><span id="sav-d-precio">—</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="sav-d-iva">—</span></div>
-      <div class="desglose-row"><span id="sav-d-cant-label">÷ unidades caja</span><span id="sav-d-cant">—</span></div>
-      <div class="desglose-row total" style="color:#f472b6"><span>Costo real/u</span><span id="sav-d-real">—</span></div>
-    </div>
-  </div>
-  <div id="hist-savory"></div>
-  <div id="alerta-sav" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Savory">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO CHESTER -->
-<div class="card hidden" id="form-chester">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(249,115,22,0.2);color:#f97316">Chester</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Monto total factura ($)</label>
-      <div class="input-money-wrap"><input type="text" id="total-che" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $61.427" oninput="formatMoneyInput(this);calcularCostoRealChe()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Total unidades</label>
-      <input type="number" id="cant-che" class="form-input" placeholder="Ej: 24" inputmode="numeric" oninput="calcularCostoRealChe()">
-    </div>
-  </div>
-  <div class="costo-real-box" id="costo-real-box-che" style="border-color:#f97316;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-che" style="color:#f97316">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Monto total factura</span><span id="che-d-total">—</span></div>
-      <div class="desglose-row"><span id="che-d-cant-label">÷ unidades</span><span id="che-d-cant">—</span></div>
-      <div class="desglose-row total" style="color:#f97316"><span>Costo real/u</span><span id="che-d-real">—</span></div>
-    </div>
-  </div>
-  <div id="che-productos-section" style="display:none">
-    <div class="card-title" style="margin-top:4px">Productos de la factura</div>
-    <div id="che-lista-productos" style="margin-bottom:10px"></div>
-    <div class="row-2" style="margin-bottom:8px">
-      <div class="form-group" style="margin-bottom:0">
-        <input type="text" id="cod-che-new" class="form-input" placeholder="Código de barra" inputmode="numeric" style="font-size:13px">
-      </div>
-      <div class="form-group" style="margin-bottom:0">
-        <input type="text" id="nombre-che-new" class="form-input" placeholder="Nombre producto" style="font-size:13px">
-      </div>
-    </div>
-    <button type="button" onclick="agregarProductoChe()"
-      style="width:100%;padding:10px;border-radius:10px;border:2px dashed #f97316;background:rgba(249,115,22,0.08);color:#f97316;font-family:Syne,sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">
-      + Agregar producto
-    </button>
-  </div>
-  <div id="hist-chester"></div>
-  <div id="alerta-che" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Chester">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO MARCO POLO -->
-<div class="card hidden" id="form-marcopolo">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(167,139,250,0.2);color:#a78bfa">Marco Polo</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Código de barra</label>
-      <input type="text" id="cod-mp" class="form-input" placeholder="Ej: 7802800000001" inputmode="numeric" oninput="if(this.value.trim().length>=8)buscarHistorialMarcoPolo();" onblur="buscarHistorialMarcoPolo()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nombre del producto</label>
-      <input type="text" id="nombre-mp" class="form-input" placeholder="Ej: Aceituna Sevillana 200g">
-    </div>
-  </div>
-  <div class="form-group">
-    <label class="form-label">Neto unitario ($) <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">precio/u sin IVA</span></label>
-    <div class="input-money-wrap"><input type="text" id="neto-mp" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $2.129" oninput="formatMoneyInput(this);calcularCostoRealMP()"></div>
-  </div>
-  <div class="form-group">
-    <label class="form-label">Cantidad total comprada <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">para cuadrar factura</span></label>
-    <input type="number" id="cant-mp" class="form-input" placeholder="Ej: 12" inputmode="numeric" min="1">
-  </div>
-  <div class="costo-real-box" id="costo-real-box-mp" style="border-color:#a78bfa;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-mp" style="color:#a78bfa">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Neto unitario</span><span id="mp-d-neto">—</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="mp-d-iva">—</span></div>
-      <div class="desglose-row total" style="color:#a78bfa"><span>Costo real/u</span><span id="mp-d-real">—</span></div>
-    </div>
-  </div>
-  <div id="hist-marcopolo"></div>
-  <div id="alerta-mp" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-MarcoPolo">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO BOSQUES -->
-<div class="card hidden" id="form-bosques">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(52,211,153,0.2);color:#34d399">Bosques</span>
-    &nbsp;Cervezas Bosques (Rescate Brebajes)
-  </div>
-  <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Ingresa cada variedad. Los costos fijos se distribuyen proporcionalmente.</p>
-  <div id="bosq-lista-productos" style="margin-bottom:10px"></div>
-  <div id="bosq-agregar-section">
-    <div class="row-2" style="margin-bottom:8px">
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">C&oacute;digo de barra</label>
-        <input type="text" id="cod-bosq-new" class="form-input" placeholder="Ej: 7891234" inputmode="numeric" style="font-size:13px" onblur="buscarHistorialBosq()" oninput="limpiarCampoBosq()">
-      </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Nombre variedad</label>
-        <input type="text" id="nombre-bosq-new" class="form-input" placeholder="Ej: Pale Ale Ma&ntilde;io" style="font-size:13px">
-      </div>
-    </div>
-    <div class="row-2" style="margin-bottom:8px">
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Cantidad (unidades)</label>
-        <input type="number" id="cant-bosq-new" class="form-input" placeholder="Ej: 18" inputmode="numeric" style="font-size:13px">
-      </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Precio neto unit ($)</label>
-        <div class="input-money-wrap"><input type="text" id="precio-bosq-new" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $1.500" oninput="formatMoneyInput(this)" style="font-size:13px"></div>
-      </div>
-    </div>
-    <button type="button" onclick="agregarProductoBosq()" style="width:100%;padding:10px;border-radius:10px;border:2px dashed #34d399;background:rgba(52,211,153,0.08);color:#34d399;font-family:Syne,sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">+ Agregar variedad</button>
-    <button type="button" onclick="listoProductosBosq()" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#065f46,#34d399);color:#fff;font-family:Syne,sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">&#x2713; Todos los productos &mdash; continuar con costos fijos</button>
-  </div>
-  <div id="bosq-fijos-section" class="hidden">
-    <div class="sep"></div>
-    <div class="card-title">Costos fijos de la factura</div>
-    <div class="row-2">
-      <div class="form-group">
-        <label class="form-label">Envases / Packaging — Total factura ($)</label>
-        <div class="input-money-wrap"><input type="text" id="envases-bosq" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $28.800" oninput="formatMoneyInput(this);recalcularBosq()"></div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Refrigeraci&oacute;n — Total factura ($)</label>
-        <div class="input-money-wrap"><input type="text" id="refrig-bosq" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $8.400" oninput="formatMoneyInput(this);recalcularBosq()"></div>
-      </div>
-    </div>
-    <div id="bosq-total-box" style="display:none;padding:12px 16px;background:rgba(52,211,153,0.08);border:1px solid #34d399;border-radius:10px;margin-bottom:12px;font-size:13px;color:#34d399;font-family:JetBrains Mono,monospace;font-weight:600"></div>
-  </div>
-  <div id="hist-bosques"></div>
-  <div id="alerta-bosq" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Bosques">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO 860 -->
-<div class="card hidden" id="form-c860">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(129,140,248,0.2);color:#818cf8">860</span>
-    &nbsp;Cervezas 860 (Cervecera Totoral)
-  </div>
-  <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Ingresa cada variedad. Los costos fijos se distribuyen proporcionalmente.</p>
-  <div id="c860-lista-productos" style="margin-bottom:10px"></div>
-  <div id="c860-agregar-section">
-    <div class="row-2" style="margin-bottom:8px">
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">C&oacute;digo de barra</label>
-        <input type="text" id="cod-860-new" class="form-input" placeholder="Ej: 7891234" inputmode="numeric" style="font-size:13px" onblur="buscarHistorial860()" oninput="limpiarCampo860()">
-      </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Nombre variedad</label>
-        <input type="text" id="nombre-860-new" class="form-input" placeholder="Ej: IPA Monta&ntilde;a" style="font-size:13px">
-      </div>
-    </div>
-    <div class="row-2" style="margin-bottom:8px">
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Cantidad (unidades)</label>
-        <input type="number" id="cant-860-new" class="form-input" placeholder="Ej: 24" inputmode="numeric" style="font-size:13px">
-      </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Precio neto unit ($)</label>
-        <div class="input-money-wrap"><input type="text" id="precio-860-new" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $1.200" oninput="formatMoneyInput(this)" style="font-size:13px"></div>
-      </div>
-    </div>
-    <button type="button" onclick="agregarProducto860()" style="width:100%;padding:10px;border-radius:10px;border:2px dashed #818cf8;background:rgba(129,140,248,0.08);color:#818cf8;font-family:Syne,sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">+ Agregar variedad</button>
-    <button type="button" onclick="listoProductos860()" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#312e81,#818cf8);color:#fff;font-family:Syne,sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">&#x2713; Todos los productos &mdash; continuar con costos fijos</button>
-  </div>
-  <div id="c860-fijos-section" class="hidden">
-    <div class="sep"></div>
-    <div class="card-title">Costos fijos de la factura</div>
-    <div class="row-2">
-      <div class="form-group">
-        <label class="form-label">Mantenci&oacute;n — Total factura ($)</label>
-        <div class="input-money-wrap"><input type="text" id="mant-860" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $4.000" oninput="formatMoneyInput(this);recalcular860()"></div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Distribuci&oacute;n — Total factura ($)</label>
-        <div class="input-money-wrap"><input type="text" id="dist-860" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $3.000" oninput="formatMoneyInput(this);recalcular860()"></div>
-      </div>
-    </div>
-    <div id="c860-total-box" style="display:none;padding:12px 16px;background:rgba(129,140,248,0.08);border:1px solid #818cf8;border-radius:10px;margin-bottom:12px;font-size:13px;color:#818cf8;font-family:JetBrains Mono,monospace;font-weight:600"></div>
-  </div>
-  <div id="hist-c860"></div>
-  <div id="alerta-860" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-C860">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO CECINAS LLANQUIHUE -->
-<div class="card hidden" id="form-llanquihue">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(251,113,133,0.2);color:#fb7185">Llanquihue</span>
-    &nbsp;Cecinas Llanquihue (Modinger Hnos.)
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">C&oacute;digo de barra</label>
-      <input type="text" id="cod-llan" class="form-input" placeholder="Ej: 7802810031020" inputmode="numeric" oninput="if(this.value.trim().length>=8)buscarHistorialLlanquihue();" onblur="buscarHistorialLlanquihue()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nombre del producto</label>
-      <input type="text" id="nombre-llan" class="form-input" placeholder="Ej: Salchicha Vienesa 500g">
-    </div>
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Neto unitario ($) <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">s/IVA</span></label>
-      <div class="input-money-wrap"><input type="text" id="neto-llan" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $2.800" oninput="formatMoneyInput(this);calcularCostoRealLlan()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Cantidad (unidades)</label>
-      <input type="number" id="cant-llan" class="form-input" placeholder="Ej: 10" inputmode="numeric" oninput="calcularCostoRealLlan()">
-    </div>
-  </div>
-  <div class="costo-real-box" id="costo-real-box-llan" style="border-color:#fb7185;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-llan" style="color:#fb7185">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Neto unitario</span><span id="llan-d-neto">&mdash;</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="llan-d-iva">&mdash;</span></div>
-      <div class="desglose-row total" style="color:#fb7185"><span>Costo real/u</span><span id="llan-d-real">&mdash;</span></div>
-    </div>
-  </div>
-  <div id="hist-llanquihue"></div>
-  <div id="alerta-llan" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Llanquihue">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO LINDEMANN -->
-<div class="card hidden" id="form-lindemann">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(253,164,175,0.2);color:#fda4af">Lindemann</span>
-    &nbsp;Cecinas Lindemann
-  </div>
-
-  <!-- Selector de producto -->
-  <div class="form-group">
-    <label class="form-label">Producto</label>
-    <div class="iaba-select-wrap">
-      <select class="iaba-select" id="sel-lind" onchange="onSelLind()" style="border-color:#fda4af">
-        <option value="">— Selecciona un producto —</option>
-        <option value="Longaniza Parrillera 2u">Longaniza Parrillera 2u</option>
-        <option value="Tocino Ahumado 10u">Tocino Ahumado 10u</option>
-        <option value="Salchichas 5u">Salchichas 5u</option>
-        <option value="Prietas">Prietas</option>
-        <option value="Anticuchos">Anticuchos</option>
-        <option value="__otro__">Otro (escribir)…</option>
-      </select>
-    </div>
-    <!-- Botón editar — visible cuando hay opción seleccionada del lista -->
-    <button type="button" id="btn-editar-lind" onclick="editarNombreLind()"
-      style="display:none;margin-top:6px;padding:5px 12px;border-radius:8px;border:1px solid #fda4af;background:transparent;color:#fda4af;font-size:11px;font-weight:700;cursor:pointer;font-family:Syne,sans-serif">
-      ✏️ Editar nombre
-    </button>
-    <!-- Campo libre — solo visible si elige Otro o edita -->
-    <div id="lind-otro-wrap" class="hidden" style="margin-top:8px">
-      <input type="text" id="nombre-lind-otro" class="form-input"
-        placeholder="Escribe el nombre del producto"
-        style="border-color:#fda4af">
-    </div>
-  </div>
-
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Valor Total Neto ($) <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">s/IVA</span></label>
-      <div class="input-money-wrap"><input type="text" id="neto-lind" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $14.000" oninput="formatMoneyInput(this);calcularCostoRealLind()" style="border-color:#fda4af"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Cantidad (unidades)</label>
-      <input type="number" id="cant-lind" class="form-input" placeholder="Ej: 5" inputmode="numeric" oninput="calcularCostoRealLind()">
-    </div>
-  </div>
-
-  <div class="costo-real-box" id="costo-real-box-lind" style="border-color:#fda4af;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-lind" style="color:#fda4af">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Neto Total</span><span id="lind-d-neto">&mdash;</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="lind-d-iva">&mdash;</span></div>
-      <div class="desglose-row"><span id="lind-d-cant-label">&divide; unidades</span><span id="lind-d-cant">&mdash;</span></div>
-      <div class="desglose-row total" style="color:#fda4af"><span>Costo real/u</span><span id="lind-d-real">&mdash;</span></div>
-    </div>
-  </div>
-
-  <div id="hist-lindemann"></div>
-  <div id="alerta-lind" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Lindemann">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO HN -->
-<div class="card hidden" id="form-hn">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(56,189,248,0.2);color:#38bdf8">HN</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">C&oacute;digo de barra</label>
-      <input type="text" id="cod-hn" class="form-input" placeholder="Ej: 7802800000001" inputmode="numeric" oninput="if(this.value.trim().length>=8)buscarHistorialHN();" onblur="buscarHistorialHN()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nombre del producto</label>
-      <input type="text" id="nombre-hn" class="form-input" placeholder="Nombre del producto">
-    </div>
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Valor L&iacute;nea ($) <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">neto s/IVA</span></label>
-      <div class="input-money-wrap"><input type="text" id="neto-hn" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $8.500" oninput="formatMoneyInput(this);calcularCostoRealHN()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Cantidad (unidades)</label>
-      <input type="number" id="cant-hn" class="form-input" placeholder="Ej: 10" inputmode="numeric" oninput="calcularCostoRealHN()">
-    </div>
-  </div>
-  <div class="costo-real-box" id="costo-real-box-hn" style="border-color:#38bdf8;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-hn" style="color:#38bdf8">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Valor L&iacute;nea neto</span><span id="hn-d-neto">&mdash;</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="hn-d-iva">&mdash;</span></div>
-      <div class="desglose-row"><span id="hn-d-cant-label">&divide; unidades</span><span id="hn-d-cant">&mdash;</span></div>
-      <div class="desglose-row total" style="color:#38bdf8"><span>Costo real/u</span><span id="hn-d-real">&mdash;</span></div>
-    </div>
-  </div>
-  <div id="hist-hn"></div>
-  <div id="alerta-hn" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-HN">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO MAD CHARLIES -->
-<div class="card hidden" id="form-madcharlies">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(245,158,11,0.2);color:#f59e0b">Mad Charlie's</span>
-    &nbsp;Cervezas Mad Charlie's (Brebajes Valdivia)
-  </div>
-  <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Ingresa cada variedad. Marca las sin alcohol &mdash; tendr&aacute;n IABA 10% en vez de ILA 20.5%.</p>
-  <div id="mad-lista-productos" style="margin-bottom:10px"></div>
-  <div id="mad-agregar-section">
-    <div class="row-2" style="margin-bottom:8px">
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">C&oacute;digo</label>
-        <input type="text" id="cod-mad-new" class="form-input" placeholder="Ej: STL" style="font-size:13px" onblur="buscarHistorialMad()" oninput="limpiarCampoMad()">
-      </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Nombre variedad</label>
-        <input type="text" id="nombre-mad-new" class="form-input" placeholder="Ej: Stout Lata 473ml" style="font-size:13px">
-      </div>
-    </div>
-    <div class="row-2" style="margin-bottom:8px">
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Cantidad</label>
-        <input type="number" id="cant-mad-new" class="form-input" placeholder="Ej: 8" inputmode="numeric" style="font-size:13px">
-      </div>
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">Precio neto unit ($)</label>
-        <div class="input-money-wrap"><input type="text" id="precio-mad-new" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $683" oninput="formatMoneyInput(this)" style="font-size:13px"></div>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Delivery neto unit ($) <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">total delivery &divide; total unidades</span></label>
-      <div class="input-money-wrap"><input type="text" id="delivery-mad-new" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $27" oninput="formatMoneyInput(this)" style="font-size:13px"></div>
-    </div>
-    <div class="toggle-row" style="margin-bottom:12px">
-      <span class="toggle-label">&iquest;Es sin alcohol? (IABA 10% en vez de ILA 20.5%)</span>
-      <label class="toggle">
-        <input type="checkbox" id="toggle-sa-mad">
-        <span class="toggle-slider"></span>
-      </label>
-    </div>
-    <button type="button" onclick="agregarProductoMad()" style="width:100%;padding:10px;border-radius:10px;border:2px dashed #f59e0b;background:rgba(245,158,11,0.08);color:#f59e0b;font-family:Syne,sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">+ Agregar variedad</button>
-    <button type="button" onclick="listoProductosMad()" style="width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#92400e,#f59e0b);color:#fff;font-family:Syne,sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">&#x2713; Todos los productos &mdash; calcular precios</button>
-  </div>
-  <div id="mad-resultado-section" class="hidden">
-    <div class="sep"></div>
-    <div id="mad-resultado-box" style="margin-bottom:12px"></div>
-  </div>
-  <div id="hist-madcharlies"></div>
-  <div id="alerta-mad" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-MadCharlies">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO PLAGEMANN -->
-<div class="card hidden" id="form-plagemann">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(232,121,249,0.2);color:#e879f9">Plagemann</span>
-    &nbsp;Cervezas Plagemann (Cervecera Plagemann)
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Monto total factura ($)</label>
-      <div class="input-money-wrap"><input type="text" id="total-plag" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $90.000" oninput="formatMoneyInput(this);calcularCostoRealPlag()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Total unidades</label>
-      <input type="number" id="cant-plag" class="form-input" placeholder="Ej: 48" inputmode="numeric" oninput="calcularCostoRealPlag()">
-    </div>
-  </div>
-  <div class="costo-real-box" id="costo-real-box-plag" style="border-color:#e879f9;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-plag" style="color:#e879f9">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Monto total factura</span><span id="plag-d-total">&mdash;</span></div>
-      <div class="desglose-row"><span id="plag-d-cant-label">&divide; unidades</span><span id="plag-d-cant">&mdash;</span></div>
-      <div class="desglose-row total" style="color:#e879f9"><span>Costo real/u</span><span id="plag-d-real">&mdash;</span></div>
-    </div>
-  </div>
-  <div id="plag-productos-section" style="display:none">
-    <div class="card-title" style="margin-top:4px">Productos de la factura</div>
-    <div id="plag-lista-productos" style="margin-bottom:10px"></div>
-    <div class="row-2" style="margin-bottom:8px">
-      <div class="form-group" style="margin-bottom:0">
-        <input type="text" id="cod-plag-new" class="form-input" placeholder="C&oacute;digo de barra" inputmode="numeric" style="font-size:13px" onblur="buscarHistorialPlag()" oninput="limpiarCampoPlag()">
-      </div>
-      <div class="form-group" style="margin-bottom:0">
-        <input type="text" id="nombre-plag-new" class="form-input" placeholder="Nombre producto" style="font-size:13px">
-      </div>
-    </div>
-    <button type="button" onclick="agregarProductoPlag()"
-      style="width:100%;padding:10px;border-radius:10px;border:2px dashed #e879f9;background:rgba(232,121,249,0.08);color:#e879f9;font-family:Syne,sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">
-      + Agregar producto
-    </button>
-  </div>
-  <div id="hist-plagemann"></div>
-  <div id="alerta-plag" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Plagemann">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO MIGUEL TORRES -->
-<div class="card hidden" id="form-migueltor">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(220,38,38,0.2);color:#f87171">Miguel Torres</span>
-    &nbsp;Ingreso desde factura
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Código de barra</label>
-      <input type="text" id="cod-mt" class="form-input" placeholder="Ej: 10135283" inputmode="numeric" oninput="if(this.value.trim().length>=8)buscarHistorialMT();" onblur="buscarHistorialMT()">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Nombre del producto</label>
-      <input type="text" id="nombre-mt" class="form-input" placeholder="Ej: Gran Reserva Blend 750ml">
-    </div>
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Monto Total ($) <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">última columna factura</span></label>
-      <div class="input-money-wrap"><input type="text" id="punit-mt" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $38.400" oninput="formatMoneyInput(this);calcularCostoRealMT()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Total unidades <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">BT x caja × cajas</span></label>
-      <input type="number" id="btcaja-mt" class="form-input" placeholder="Ej: 6" inputmode="numeric" oninput="calcularCostoRealMT()">
-    </div>
-  </div>
-  <!-- Selector Vino / Licor -->
-  <div class="form-group">
-    <label class="form-label">Tipo de producto <span style="color:var(--red);font-size:13px">*</span></label>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <button type="button" id="mt-tipo-vino" onclick="setTipoMT('vino')"
-        style="padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s">
-        🍷 Vino (ILA 20.5%)
-      </button>
-      <button type="button" id="mt-tipo-licor" onclick="setTipoMT('licor')"
-        style="padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--surface2);color:var(--muted);font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s">
-        🥃 Licor (ILA 31.5%)
-      </button>
-    </div>
-  </div>
-  <input type="hidden" id="toggle-tipo-mt" value="">
-
-  <!-- Costo real con desglose -->
-  <div class="costo-real-box" id="costo-real-box-mt" style="border-color:#f87171;display:none">
-    <div class="label">Costo real por botella</div>
-    <div class="valor" id="costo-real-valor-mt" style="color:#f87171">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Monto Total línea</span><span id="mt-d-punit">—</span></div>
-      <div class="desglose-row"><span id="mt-d-ila-label">+ ILA 20.5%</span><span id="mt-d-ila">—</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="mt-d-iva">—</span></div>
-      <div class="desglose-row"><span id="mt-d-bt-label">÷ unidades</span><span id="mt-d-bt">—</span></div>
-      <div class="desglose-row total" style="color:#f87171"><span>Costo real/botella</span><span id="mt-d-real">—</span></div>
-    </div>
-  </div>
-
-  <div id="hist-migueltor"></div>
-  <div id="alerta-mt" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-MiguelTorres">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO CARANCHO -->
-<div class="card hidden" id="form-carancho">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(245,158,11,0.2);color:#fbbf24">Carancho</span>
-    &nbsp;Pisco Sour Artesanal
-  </div>
-  <div class="form-group">
-    <label class="form-label">Producto <span style="color:var(--red);font-size:13px">*</span></label>
-    <select id="sel-carancho" class="form-input" onchange="onSelCarancho();buscarHistorialCarancho()">
-      <option value="">— Selecciona producto —</option>
-      <option value="Sour Original 1Lt">Sour Original 1Lt</option>
-      <option value="Sour Maqui 1Lt">Sour Maqui 1Lt</option>
-      <option value="Sour Maracuya 1Lt">Sour Maracuya 1Lt</option>
-      <option value="Sour Original 470cc">Sour Original 470cc</option>
-      <option value="Sour Maracuya 470cc">Sour Maracuya 470cc</option>
-      <option value="__otro__">— Otro (ingresar manualmente) —</option>
-    </select>
-  </div>
-  <div class="form-group hidden" id="carancho-otro-wrap">
-    <label class="form-label">Nombre del producto</label>
-    <input type="text" id="nombre-carancho-otro" class="form-input" placeholder="Ej: Sour Frambuesa 1Lt">
-  </div>
-  <div class="form-group">
-    <label class="form-label">Código de Barra <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">se autocompleta</span></label>
-    <input type="text" id="cod-carancho" class="form-input" placeholder="Selecciona un producto" inputmode="numeric">
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Valor Factura ($) <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">columna Valor</span></label>
-      <div class="input-money-wrap"><input type="text" id="valor-carancho" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $26.310" oninput="formatMoneyInput(this);calcularCostoRealCarancho()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Cantidad</label>
-      <input type="number" id="cant-carancho" class="form-input" placeholder="Ej: 3" inputmode="numeric" oninput="calcularCostoRealCarancho()">
-    </div>
-  </div>
-  <div class="costo-real-box" id="costo-real-box-carancho" style="border-color:#fbbf24;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-carancho" style="color:#fbbf24">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Valor factura</span><span id="car-d-valor">—</span></div>
-      <div class="desglose-row"><span id="car-d-cant-label">÷ unidades</span><span id="car-d-unit">—</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="car-d-iva">—</span></div>
-      <div class="desglose-row total" style="color:#fbbf24"><span>Costo real/unidad</span><span id="car-d-real">—</span></div>
-    </div>
-  </div>
-  <div id="hist-carancho"></div>
-  <div id="alerta-carancho" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Carancho">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO CASAWER -->
-<div class="card hidden" id="form-casawer">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(6,182,212,0.2);color:#22d3ee">Casawer</span>
-    &nbsp;Pisco Sour Artesanal
-  </div>
-  <div class="form-group">
-    <label class="form-label">Producto <span style="color:var(--red);font-size:13px">*</span></label>
-    <select id="sel-casawer" class="form-input" onchange="onSelCasawer();buscarHistorialCasawer()">
-      <option value="">— Selecciona producto —</option>
-      <option value="Pisco Sour 1.2 LT">Pisco Sour 1.2 LT</option>
-      <option value="Pisco Sour 500cc">Pisco Sour 500cc</option>
-      <option value="__otro__">— Otro (ingresar manualmente) —</option>
-    </select>
-  </div>
-  <div class="form-group hidden" id="casawer-otro-wrap">
-    <label class="form-label">Nombre del producto</label>
-    <input type="text" id="nombre-casawer-otro" class="form-input" placeholder="Ej: Pisco Sour Maqui 750ml">
-  </div>
-  <div class="form-group">
-    <label class="form-label">Código de Barra <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">se autocompleta</span></label>
-    <input type="text" id="cod-casawer" class="form-input" placeholder="Selecciona un producto" inputmode="numeric">
-  </div>
-  <div class="row-2">
-    <div class="form-group">
-      <label class="form-label">Valor Factura ($) <span style="color:var(--muted);font-weight:400;text-transform:none;font-size:10px">columna Valor</span></label>
-      <div class="input-money-wrap"><input type="text" id="valor-casawer" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $47.500" oninput="formatMoneyInput(this);calcularCostoRealCasawer()"></div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Cantidad</label>
-      <input type="number" id="cant-casawer" class="form-input" placeholder="Ej: 5" inputmode="numeric" oninput="calcularCostoRealCasawer()">
-    </div>
-  </div>
-  <div class="costo-real-box" id="costo-real-box-casawer" style="border-color:#22d3ee;display:none">
-    <div class="label">Costo real por unidad</div>
-    <div class="valor" id="costo-real-valor-casawer" style="color:#22d3ee">$0</div>
-    <div class="desglose">
-      <div class="desglose-row"><span>Valor factura</span><span id="cas-d-valor">—</span></div>
-      <div class="desglose-row"><span id="cas-d-cant-label">÷ unidades</span><span id="cas-d-unit">—</span></div>
-      <div class="desglose-row"><span>+ IVA 19%</span><span id="cas-d-iva">—</span></div>
-      <div class="desglose-row total" style="color:#22d3ee"><span>Costo real/unidad</span><span id="cas-d-real">—</span></div>
-    </div>
-  </div>
-  <div id="hist-casawer"></div>
-  <div id="alerta-casawer" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Casawer">🔄 Nuevo producto</button>
-</div>
-
-<!-- FORMULARIO JESTER -->
-<div class="card hidden" id="form-jester">
-  <div class="card-title">
-    <span class="badge" style="background:rgba(250,204,21,0.2);color:#facc15">Jester</span>
-    &nbsp;Cerveza Artesanal (Hutchings y Ricci)
-  </div>
-  <div class="form-group">
-    <label class="form-label">Monto Log&iacute;stica (subtotal) de la factura</label>
-    <div class="input-money-wrap"><input type="text" id="logistica-jester" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $20.571" oninput="formatMoneyInput(this);recalcularJester()"></div>
-  </div>
-  <div class="sep"></div>
-  <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Ingresa cada variedad de la factura.</p>
-  <div id="jester-lista-productos" style="margin-bottom:10px"></div>
-  <div class="row-2" style="margin-bottom:8px">
-    <div class="form-group" style="margin-bottom:0">
-      <label class="form-label">C&oacute;digo de barra</label>
-      <input type="text" id="cod-jester-new" class="form-input" placeholder="Ej: 7891234" inputmode="numeric" style="font-size:13px">
-    </div>
-    <div class="form-group" style="margin-bottom:0">
-      <label class="form-label">Nombre variedad</label>
-      <input type="text" id="nombre-jester-new" class="form-input" placeholder="Ej: Manitoba Ale 5,2&deg;" style="font-size:13px">
-    </div>
-  </div>
-  <div class="row-2" style="margin-bottom:8px">
-    <div class="form-group" style="margin-bottom:0">
-      <label class="form-label">Cantidad (unidades)</label>
-      <input type="number" id="cant-jester-new" class="form-input" placeholder="Ej: 8" inputmode="numeric" style="font-size:13px">
-    </div>
-    <div class="form-group" style="margin-bottom:0">
-      <label class="form-label">Monto Subtotal ($)</label>
-      <div class="input-money-wrap"><input type="text" id="subtotal-jester-new" class="form-input" inputmode="numeric" autocomplete="off" placeholder="Ej: $11.090" oninput="formatMoneyInput(this)" style="font-size:13px"></div>
-    </div>
-  </div>
-  <button type="button" onclick="agregarProductoJester()" style="width:100%;padding:10px;border-radius:10px;border:2px dashed #facc15;background:rgba(250,204,21,0.08);color:#facc15;font-family:Syne,sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px">+ Agregar variedad</button>
-  <div id="jester-total-box" style="display:none;padding:12px 16px;background:rgba(250,204,21,0.08);border:1px solid #facc15;border-radius:10px;margin-bottom:12px;font-size:13px;color:#facc15;font-family:JetBrains Mono,monospace;font-weight:600"></div>
-  <div id="hist-jester"></div>
-  <div id="alerta-jester" class="alerta"></div>
-  <button class="btn-nuevo-prod" onclick="nuevoProducto()" style="display:none" id="btn-nuevo-Jester">🔄 Nuevo producto</button>
-</div>
-
-<!-- MARGENES (compartido) -->
-<div class="card hidden" id="card-margenes">
-  <div class="card-title">&#x1F4B0; Precios de venta sugeridos</div>
-  <div id="precio-actual-box" class="hidden" style="margin-bottom:12px"></div>
-  <div id="margenes-normal">
-    <div class="margenes-grid">
-      <div class="margen-item" onclick="seleccionarPrecioDesdeMargen(20, this)" style="cursor:pointer" title="Fijar referencia 20%"><div class="margen-label">20%</div><div class="margen-valor" id="r20">&mdash;</div></div>
-      <div class="margen-item" onclick="seleccionarPrecioDesdeMargen(25, this)" style="cursor:pointer" title="Fijar referencia 25%"><div class="margen-label">25%</div><div class="margen-valor" id="r25">&mdash;</div></div>
-      <div class="margen-item highlight" onclick="seleccionarPrecioDesdeMargen(30, this)" style="cursor:pointer" title="Fijar referencia 30%"><div class="margen-label">30%</div><div class="margen-valor" id="r30">&mdash;</div></div>
-      <div class="margen-item" onclick="seleccionarPrecioDesdeMargen(35, this)" style="cursor:pointer" title="Fijar referencia 35%"><div class="margen-label">35%</div><div class="margen-valor" id="r35">&mdash;</div></div>
-      <div class="margen-item" onclick="seleccionarPrecioDesdeMargen(40, this)" style="cursor:pointer" title="Fijar referencia 40%"><div class="margen-label">40%</div><div class="margen-valor" id="r40">&mdash;</div></div>
-      <div class="margen-item pedidosya">
-        <div>
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/PedidosYa_logo.svg/320px-PedidosYa_logo.svg.png" style="height:22px;object-fit:contain;vertical-align:middle;margin-bottom:2px" alt="PedidosYa">
-          <div style="font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:0.5px">precio sugerido</div>
-        </div>
-        <div class="margen-valor" id="rpy">&mdash;</div>
-      </div>
-    </div>
-  </div>
-  <div id="margenes-pack" class="hidden">
-    <div class="margenes-grid-pack">
-      <div class="pack-header">Margen</div>
-      <div class="pack-header">Unitario</div>
-      <div class="pack-header" id="pack-header-label">Pack x6</div>
-      <div class="margen-item"><div class="margen-label">20%</div></div>
-      <div class="margen-item" onclick="seleccionarPrecioPackDesde(20,'u',this)" style="cursor:pointer" title="Seleccionar precio unitario 20%"><div class="margen-valor" id="r20u">&mdash;</div></div>
-      <div class="margen-item" onclick="seleccionarPrecioPackDesde(20,'p',this)" style="cursor:pointer" title="Seleccionar precio pack 20%"><div class="margen-valor" id="r20p">&mdash;</div></div>
-      <div class="margen-item"><div class="margen-label">25%</div></div>
-      <div class="margen-item" onclick="seleccionarPrecioPackDesde(25,'u',this)" style="cursor:pointer" title="Seleccionar precio unitario 25%"><div class="margen-valor" id="r25u">&mdash;</div></div>
-      <div class="margen-item" onclick="seleccionarPrecioPackDesde(25,'p',this)" style="cursor:pointer" title="Seleccionar precio pack 25%"><div class="margen-valor" id="r25p">&mdash;</div></div>
-      <div class="margen-item highlight"><div class="margen-label">30%</div></div>
-      <div class="margen-item highlight" onclick="seleccionarPrecioPackDesde(30,'u',this)" style="cursor:pointer" title="Seleccionar precio unitario 30%"><div class="margen-valor" id="r30u">&mdash;</div></div>
-      <div class="margen-item highlight" onclick="seleccionarPrecioPackDesde(30,'p',this)" style="cursor:pointer" title="Seleccionar precio pack 30%"><div class="margen-valor" id="r30p">&mdash;</div></div>
-      <div class="margen-item"><div class="margen-label">35%</div></div>
-      <div class="margen-item" onclick="seleccionarPrecioPackDesde(35,'u',this)" style="cursor:pointer" title="Seleccionar precio unitario 35%"><div class="margen-valor" id="r35u">&mdash;</div></div>
-      <div class="margen-item" onclick="seleccionarPrecioPackDesde(35,'p',this)" style="cursor:pointer" title="Seleccionar precio pack 35%"><div class="margen-valor" id="r35p">&mdash;</div></div>
-      <div class="margen-item"><div class="margen-label">40%</div></div>
-      <div class="margen-item" onclick="seleccionarPrecioPackDesde(40,'u',this)" style="cursor:pointer" title="Seleccionar precio unitario 40%"><div class="margen-valor" id="r40u">&mdash;</div></div>
-      <div class="margen-item" onclick="seleccionarPrecioPackDesde(40,'p',this)" style="cursor:pointer" title="Seleccionar precio pack 40%"><div class="margen-valor" id="r40p">&mdash;</div></div>
-      <div class="margen-item pedidosya" style="grid-column:span 1">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/PedidosYa_logo.svg/320px-PedidosYa_logo.svg.png" style="height:18px;object-fit:contain" alt="PedidosYa">
-      </div>
-      <div class="margen-item pedidosya" style="grid-column:span 1"><div class="margen-valor" id="rpyu">&mdash;</div></div>
-      <div class="margen-item pedidosya" style="grid-column:span 1"><div class="margen-valor" id="rpyp">&mdash;</div></div>
-    </div>
-  </div>
-  <button class="btn-save" id="btn-save" onclick="guardar()" disabled style="opacity:0.5">&#x1F446; Selecciona un precio de venta primero</button>
-
-  <!-- Campo precio elegido editable -->
-  <div id="precio-elegido-wrap" style="display:none;margin-bottom:12px;padding:12px 14px;background:var(--surface2);border:1px solid var(--green);border-radius:var(--radius)">
-    <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--green);margin-bottom:8px">💰 Precio elegido — editable</div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <div style="position:relative;flex:1">
-        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;pointer-events:none">$</span>
-        <input type="text" id="precio-elegido-input" inputmode="numeric" autocomplete="off" placeholder="0"
-          style="width:100%;padding:10px 12px 10px 26px;background:var(--surface);border:2px solid var(--accent);border-radius:10px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;outline:none"
-          onfocus="this.value=this.dataset.raw||''; this.select();"
-          onblur="formatPrecioElegido(this)"
-          oninput="formatPrecioElegidoLive(this)">
-      </div>
-      <div id="precio-elegido-pct" style="font-size:12px;color:var(--muted);white-space:nowrap;min-width:60px;font-weight:700"></div>
-    </div>
-    <div id="precio-elegido-error" style="display:none;margin-top:6px;font-size:12px;color:var(--red);font-weight:700"></div>
-  </div>
-</div>
-
-</div>
-
-<!-- TOAST OK -->
-<div class="toast" id="toast">&#x2705; Guardado correctamente</div>
-<!-- TOAST ERROR -->
-<div class="toast-error" id="toast-error">&#x26A0;&#xFE0F; Error</div>
-
+  cargarFuncionarios().catch(e => { $('login-msg').textContent = 'No se pudo cargar la lista de nombres: ' + e.message; });
+</script>
 </body>
 </html>
