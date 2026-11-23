@@ -19,6 +19,8 @@
   button.bt.sec { background:#1e293b; border-color:#334155; font-weight:600; }
   .saludo { font-size:20px; font-weight:700; }
   .voz { font-size:13px; color:var(--muted); background:var(--panel); }
+  .ajustes { display:flex; gap:16px; font-size:13px; color:var(--muted); align-items:center; flex-wrap:wrap; }
+  .ajustes input { width:120px; padding:0; border:0; background:transparent; accent-color:var(--cian); }
   .resp { flex:1; min-height:240px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; white-space:pre-wrap; overflow:auto; line-height:1.5; font-size:15px; }
   .entrada { display:flex; gap:8px; align-items:flex-end; }
   .entrada textarea { flex:1; resize:none; min-height:48px; max-height:160px; overflow-y:auto; }
@@ -34,6 +36,7 @@
     <button id="b-voz" title="Responder siempre en voz">🔇</button>
     <button id="b-wake" title="Escuchar la palabra 'Jarvis'">👂</button>
     <button id="b-mic" title="Hablar una pregunta">🎤</button>
+    <button id="b-conv" title="Conversación por voz (continua)">🎙️</button>
   </span>
 </header>
 
@@ -51,6 +54,10 @@
   <section id="pantalla-chat" class="oculto" style="display:flex;flex-direction:column;gap:12px;flex:1">
     <div class="saludo" id="saludo"></div>
     <select id="voz" class="voz"></select>
+    <div class="ajustes">
+      <label>Tono <input type="range" id="tono" min="0.5" max="1.5" step="0.05" value="0.8"></label>
+      <label>Velocidad <input type="range" id="vel" min="0.7" max="1.3" step="0.05" value="1"></label>
+    </div>
     <div class="resp" id="resp"></div>
     <div class="msg" id="msg"></div>
     <div class="entrada">
@@ -65,7 +72,7 @@
   const API = 'https://script.google.com/macros/s/AKfycbwcNig7G26Th8jJzdpnJkt5Ic8qIMYDtk_6iZ_gUaJxFbpsxRT4mFyd9NfWOdsoGtGU/exec';
 
   let sesion = null;          // solo en memoria: se pierde al cerrar la página
-  let wakeOn = false, hablando = false, rec = null;
+  let wakeOn = false, convOn = false, hablando = false, rec = null;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
   const $ = id => document.getElementById(id);
@@ -157,9 +164,11 @@
     const nombre = $('voz').value;
     const v = speechSynthesis.getVoices().find(x => x.name === nombre);
     if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'es-CL'; }
+    u.pitch = parseFloat($('tono').value);   // más bajo = voz más grave
+    u.rate = parseFloat($('vel').value);     // velocidad de habla
     hablando = true;
     if (rec) { try { rec.abort(); } catch (e) {} }
-    u.onend = () => { hablando = false; if (wakeOn) setTimeout(() => arrancar(true), 300); };
+    u.onend = () => { hablando = false; if (wakeOn || convOn) setTimeout(() => arrancar(true), 300); };
     speechSynthesis.speak(u);
   }
 
@@ -199,7 +208,7 @@
     r.onend = () => {
       rec = null;
       $('b-mic').classList.remove('escucha');
-      if (wakeOn && !hablando) setTimeout(() => arrancar(true), 300);
+      if ((wakeOn || convOn) && !hablando) setTimeout(() => arrancar(true), 300);
     };
     try { r.start(); } catch (e) { rec = null; $('b-mic').classList.remove('escucha'); }
   }
@@ -209,7 +218,24 @@
     $('b-wake').style.color = wakeOn ? 'var(--verde)' : '';
   }
   $('b-mic').onclick = () => { if (rec) { rec.stop(); return; } $('msg').textContent = 'Escuchando… habla ahora.'; arrancar(false); };
+  // Conversación por voz: escucha continua, cada frase es una pregunta y la respuesta se lee en voz alta
+  $('b-conv').onclick = () => {
+    convOn = !convOn;
+    $('b-conv').classList.toggle('on', convOn);
+    if (convOn) {
+      wakeOn = false; pintarBotones();
+      vozSiempre = true; $('b-voz').textContent = '🔊'; $('b-voz').classList.add('on');
+      $('msg').textContent = 'Conversación activa. Habla y te respondo en voz.';
+      if (rec) rec.stop();
+      arrancar(true);
+    } else {
+      if (rec) rec.stop();
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
+      $('msg').textContent = 'Conversación por voz apagada.';
+    }
+  };
   $('b-wake').onclick = () => {
+    convOn = false; $('b-conv').classList.remove('on');
     wakeOn = !wakeOn; pintarBotones();
     if (rec) rec.stop();
     if (wakeOn) { $('msg').textContent = 'Escuchando la palabra "Jarvis"… di "Hola Jarvis" o "Jarvis, dame el precio de…".'; arrancar(true); }
