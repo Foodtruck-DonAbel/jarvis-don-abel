@@ -142,10 +142,18 @@
   let vozSiempre = false;
   $('b-voz').onclick = () => { vozSiempre = !vozSiempre; $('b-voz').textContent = vozSiempre ? '🔊' : '🔇'; $('b-voz').classList.toggle('on', vozSiempre); };
 
+  // Prepara el texto para la voz: "$13.300" → "13300 pesos" (si no, lo lee como decimales)
+  function paraVoz(t) {
+    return String(t)
+      .replace(/\d{1,3}(?:\.\d{3})+/g, m => m.replace(/\./g, ''))
+      .replace(/\$\s?(\d+)/g, '$1 pesos')
+      .replace(/\$/g, '')
+      .replace(/\*/g, '');
+  }
   function hablar(t, forzar) {
     if (!('speechSynthesis' in window) || !(forzar || vozSiempre)) return;
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(t);
+    const u = new SpeechSynthesisUtterance(paraVoz(t));
     const nombre = $('voz').value;
     const v = speechSynthesis.getVoices().find(x => x.name === nombre);
     if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'es-CL'; }
