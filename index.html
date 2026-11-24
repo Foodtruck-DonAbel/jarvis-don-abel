@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,14 +7,14 @@
 <style>
   :root { --bg:#0b1220; --panel:#111827; --line:#1f2a3d; --txt:#e5e7eb; --muted:#94a3b8; --cian:#22d3ee; --verde:#4ade80; }
   * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--txt); font-family:system-ui,Segoe UI,Roboto,sans-serif; min-height:100vh; display:flex; flex-direction:column; }
+  body { margin:0; background:var(--bg); color:var(--txt); font-family: system-ui, Segoe UI, Roboto, sans-serif; min-height:100vh; display:flex; flex-direction:column; }
   header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); }
   .titulo { font-weight:800; letter-spacing:3px; color:#67e8f9; font-size:18px; }
   .acc button { background:none; border:0; color:var(--muted); font-size:18px; cursor:pointer; padding:4px 8px; }
   .acc button.on { color:var(--verde); }
   main { flex:1; display:flex; flex-direction:column; padding:14px 18px; gap:12px; max-width:760px; width:100%; margin:0 auto; }
   .login { display:flex; flex-direction:column; gap:10px; margin-top:30px; }
-  select,input,textarea,button.bt { font:inherit; border-radius:10px; border:1px solid #334155; background:#1e293b; color:var(--txt); padding:12px; }
+  select, input, textarea, button.bt { font:inherit; border-radius:10px; border:1px solid #334155; background:#1e293b; color:var(--txt); padding:12px; }
   button.bt { background:#1d4ed8; border-color:#1d4ed8; cursor:pointer; font-weight:700; }
   button.bt.sec { background:#1e293b; border-color:#334155; font-weight:600; }
   .saludo { font-size:20px; font-weight:700; }
@@ -35,13 +34,14 @@
   <span class="titulo">JARVIS</span>
   <span class="acc oculto" id="acc">
     <button id="b-voz" title="Responder siempre en voz">🔇</button>
-    <button id="b-wake" title="Escuchar la palabra Jarvis">👂</button>
+    <button id="b-wake" title="Escuchar la palabra 'Jarvis'">👂</button>
     <button id="b-mic" title="Hablar una pregunta">🎤</button>
-    <button id="b-conv" title="Conversación por voz continua">🎙️</button>
+    <button id="b-conv" title="Conversación por voz (continua)">🎙️</button>
   </span>
 </header>
 
 <main>
+  <!-- Ingreso -->
   <section id="pantalla-login" class="login">
     <div class="saludo">Ingresa para hablar con Jarvis</div>
     <select id="login-func"></select>
@@ -50,6 +50,7 @@
     <div class="msg" id="login-msg"></div>
   </section>
 
+  <!-- Conversación -->
   <section id="pantalla-chat" class="oculto" style="display:flex;flex-direction:column;gap:12px;flex:1">
     <div class="saludo" id="saludo"></div>
     <select id="voz" class="voz"></select>
@@ -67,439 +68,181 @@
 </main>
 
 <script>
-const API = 'https://script.google.com/macros/s/AKfycbwcNig7G26Th8jJzdpnJkt5Ic8qIMYDtk_6iZ_gUaJxFbpsxRT4mFyd9NfWOdsoGtGU/exec';
+  // Dirección de la app de Apps Script (la misma que usa el POS)
+  const API = 'https://script.google.com/macros/s/AKfycbwcNig7G26Th8jJzdpnJkt5Ic8qIMYDtk_6iZ_gUaJxFbpsxRT4mFyd9NfWOdsoGtGU/exec';
 
-let sesion = null;
-let wakeOn = false, convOn = false, hablando = false, rec = null;
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let sesion = null;          // solo en memoria: se pierde al cerrar la página
+  let wakeOn = false, convOn = false, hablando = false, rec = null;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-const $ = id => document.getElementById(id);
-const esc = s => String(s ?? '');
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '');
 
-async function llamar(payload) {
-  const r = await fetch(API, {
-    method: 'POST',
-    headers: {'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify(payload)
-  });
-  return r.json();
-}
-
-// ── Ingreso ──
-async function cargarFuncionarios() {
-  const lista = await (await fetch(API + '?action=jarvisFuncionarios')).json();
-  const sel = $('login-func');
-  sel.innerHTML = '';
-  lista.forEach(f => {
-    const o = document.createElement('option');
-    o.value = f.id;
-    o.textContent = f.nombre;
-    sel.appendChild(o);
-  });
-}
-
-async function entrar() {
-  $('login-msg').textContent = '';
-  const id = $('login-func').value;
-  const pin = $('login-pin').value.trim();
-
-  if (!id || !pin) {
-    $('login-msg').textContent = 'Elige tu nombre e ingresa el PIN';
-    return;
+  // Llamadas a la app de Apps Script. text/plain evita el preflight de CORS.
+  async function llamar(payload) {
+    const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+    return r.json();
   }
 
-  try {
-    const r = await llamar({accion:'jarvisLogin',id,pin});
-
-    if (!r.ok) {
-      $('login-msg').textContent = r.error || 'PIN incorrecto';
-      return;
-    }
-
-    if (r.funcionario.rol !== 'Admin') {
-      $('login-msg').textContent = 'Jarvis es solo para administradores';
-      return;
-    }
-
-    sesion = {
-      id:r.funcionario.id,
-      nombre:r.funcionario.nombre,
-      pin
-    };
-
-    $('login-pin').value = '';
-    aplicarPreferenciasUsuario();
-    mostrarChat();
-
-  } catch(e) {
-    $('login-msg').textContent = 'No se pudo conectar: ' + e.message;
+  // ── Ingreso ──
+  async function cargarFuncionarios() {
+    const lista = await (await fetch(API + '?action=jarvisFuncionarios')).json();
+    const sel = $('login-func');
+    sel.innerHTML = '';
+    lista.forEach(f => { const o = document.createElement('option'); o.value = f.id; o.textContent = f.nombre; sel.appendChild(o); });
   }
-}
-
-function mostrarChat() {
-  $('pantalla-login').classList.add('oculto');
-  $('pantalla-chat').classList.remove('oculto');
-  $('acc').classList.remove('oculto');
-
-  const saludo = 'Hola, ' + sesion.nombre + '. ¿En qué te ayudo?';
-  $('saludo').textContent = saludo;
-  $('resp').textContent = '';
-
-  hablar(saludo,true);
-}
-
-$('btn-entrar').onclick = entrar;
-$('login-pin').addEventListener('keydown',e => {
-  if(e.key === 'Enter') entrar();
-});
-
-// ── Preguntar ──
-async function preguntar(hablado) {
-  const txt = $('pregunta');
-  const q = txt.value.trim();
-
-  if (!q) {
-    $('msg').textContent = 'Escribe o di una pregunta.';
-    return;
+  async function entrar() {
+    $('login-msg').textContent = '';
+    const id = $('login-func').value, pin = $('login-pin').value.trim();
+    if (!id || !pin) { $('login-msg').textContent = 'Elige tu nombre e ingresa el PIN'; return; }
+    try {
+      const r = await llamar({ accion: 'jarvisLogin', id, pin });
+      if (!r.ok) { $('login-msg').textContent = r.error || 'PIN incorrecto'; return; }
+      if (r.funcionario.rol !== 'Admin') { $('login-msg').textContent = 'Jarvis es solo para administradores'; return; }
+      sesion = { id: r.funcionario.id, nombre: r.funcionario.nombre, pin };
+      $('login-pin').value = '';
+      mostrarChat();
+    } catch (e) { $('login-msg').textContent = 'No se pudo conectar: ' + e.message; }
   }
-
-  $('msg').textContent = '';
-  $('resp').textContent = 'Pensando…';
-  txt.value = '';
-  txt.style.height = 'auto';
-
-  try {
-    const r = await llamar({
-      accion:'jarvisPreguntar',
-      pregunta:q,
-      cajeroId:sesion.id,
-      pin:sesion.pin
-    });
-
-    const t = String(r.ok ? r.respuesta : (r.error || 'Jarvis no respondió.')).replace(/\*\*/g,'');
-    $('resp').textContent = t;
-    hablar(t,hablado);
-
-  } catch(e) {
-    $('resp').textContent = 'Error: ' + e.message;
+  function mostrarChat() {
+    $('pantalla-login').classList.add('oculto');
+    $('pantalla-chat').classList.remove('oculto');
+    $('acc').classList.remove('oculto');
+    const saludo = 'Hola, ' + sesion.nombre + '. ¿En qué te ayudo?';
+    $('saludo').textContent = saludo;
+    $('resp').textContent = '';
+    hablar(saludo, true);
   }
-}
-
-$('btn-enviar').onclick = () => preguntar(false);
-
-$('pregunta').addEventListener('input',e => {
-  e.target.style.height = 'auto';
-  e.target.style.height = Math.min(e.target.scrollHeight,160) + 'px';
-});
-
-$('pregunta').addEventListener('keydown',e => {
-  if(e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    preguntar(false);
-  }
-});
-
-// ── Preferencias por usuario y dispositivo ──
-function clavePreferencias() {
-  return sesion ? 'jarvis_preferencias_v1_' + String(sesion.id) : null;
-}
-
-function leerPreferencias() {
-  try {
-    const clave = clavePreferencias();
-    const raw = clave && localStorage.getItem(clave);
-    return raw ? JSON.parse(raw) : {};
-  } catch(e) {
-    return {};
-  }
-}
-
-function guardarPreferencias() {
-  if (!sesion) return;
-
-  try {
-    const datos = {
-      voz:$('voz').value || '',
-      tono:$('tono').value,
-      velocidad:$('vel').value
-    };
-
-    localStorage.setItem(clavePreferencias(),JSON.stringify(datos));
-  } catch(e) {}
-}
-
-function idVoz(v) {
-  return v.voiceURI || (v.name + '|' + v.lang);
-}
-
-function cargarVoces() {
-  if (!('speechSynthesis' in window)) return;
-
-  const voces = speechSynthesis.getVoices();
-  const sel = $('voz');
-  const seleccionActual = sel.value;
-  const preferencia = leerPreferencias();
-  const vozGuardada = preferencia.voz || seleccionActual;
-
-  sel.innerHTML = '';
-
-  // Mostrar todas las voces que exponga el dispositivo.
-  voces.forEach(v => {
-    const o = document.createElement('option');
-    o.value = idVoz(v);
-    o.textContent = v.name + ' (' + v.lang + ')' +
-      (v.default ? ' · predeterminada' : '');
-    sel.appendChild(o);
-  });
-
-  if (!voces.length) {
-    const o = document.createElement('option');
-    o.value = '';
-    o.textContent = 'Voz predeterminada del dispositivo';
-    sel.appendChild(o);
-    return;
-  }
-
-  const disponible = voces.some(v => idVoz(v) === vozGuardada);
-
-  if (disponible) {
-    sel.value = vozGuardada;
-  } else {
-    const alternativa =
-      voces.find(v => /^es(-|$)/i.test(v.lang)) ||
-      voces.find(v => v.default) ||
-      voces[0];
-
-    sel.value = idVoz(alternativa);
-  }
-}
-
-if ('speechSynthesis' in window) {
-  cargarVoces();
-  speechSynthesis.onvoiceschanged = cargarVoces;
-
-  [300,800,1500,3000].forEach(ms => setTimeout(cargarVoces,ms));
-
-  window.addEventListener('pageshow',cargarVoces);
-  window.addEventListener('focus',cargarVoces);
-}
-
-function aplicarPreferenciasUsuario() {
-  const p = leerPreferencias();
-
-  if (p.tono !== undefined) $('tono').value = p.tono;
-  if (p.velocidad !== undefined) $('vel').value = p.velocidad;
-
-  cargarVoces();
-}
-
-$('voz').addEventListener('change',guardarPreferencias);
-$('tono').addEventListener('input',guardarPreferencias);
-$('vel').addEventListener('input',guardarPreferencias);
-
-let vozSiempre = false;
-
-$('b-voz').onclick = () => {
-  vozSiempre = !vozSiempre;
-  $('b-voz').textContent = vozSiempre ? '🔊' : '🔇';
-  $('b-voz').classList.toggle('on',vozSiempre);
-};
-
-// ── Preparar texto para lectura ──
-function paraVoz(t) {
-  return String(t)
-    .replace(/\d{1,3}(?:\.\d{3})+/g,m => m.replace(/\./g,''))
-    .replace(/\$\s?(\d+)/g,'$1 pesos')
-    .replace(/\$/g,'')
-    .replace(/\*/g,'');
-}
-
-function hablar(t,forzar) {
-  if (!('speechSynthesis' in window) || !(forzar || vozSiempre)) return;
-
-  speechSynthesis.cancel();
-
-  const u = new SpeechSynthesisUtterance(paraVoz(t));
-  const seleccion = $('voz').value;
-  const voces = speechSynthesis.getVoices();
-  const v = voces.find(x => idVoz(x) === seleccion);
-
-  if (v) {
-    u.voice = v;
-    u.lang = v.lang;
-  } else {
-    u.lang = 'es-CL';
-  }
-
-  u.pitch = parseFloat($('tono').value);
-  u.rate = parseFloat($('vel').value);
-
-  hablando = true;
-
-  if (rec) {
-    try { rec.abort(); } catch(e) {}
-  }
-
-  u.onend = () => {
-    hablando = false;
-    if (wakeOn || convOn) setTimeout(() => arrancar(true),300);
-  };
-
-  speechSynthesis.speak(u);
-}
-
-// ── Micrófono ──
-const msgMic = {
-  'not-allowed':'El navegador no dio permiso para el micrófono. Revisa el candado de la dirección y permite el micrófono.',
-  'service-not-allowed':'El navegador no dio permiso para el micrófono.',
-  'audio-capture':'No encuentro un micrófono conectado.',
-  'no-speech':'No escuché nada. Intenta de nuevo.',
-  'network':'Sin conexión para dictar.'
-};
-
-function arrancar(continuo) {
-  if (!SR) {
-    $('msg').textContent = 'Este navegador no permite dictar.';
-    return;
-  }
-
-  if (rec) return;
-
-  const r = new SR();
-  r.lang = 'es-CL';
-  r.continuous = continuo;
-  r.interimResults = false;
-  r.maxAlternatives = 1;
-  rec = r;
-
-  $('b-mic').classList.add('escucha');
-
-  r.onresult = ev => {
-    for(let i=ev.resultIndex;i<ev.results.length;i++) {
-      if(!ev.results[i].isFinal) continue;
-
-      const t = ev.results[i][0].transcript;
-
-      if(wakeOn) $('msg').textContent = 'Escuché: "' + t + '"';
-
-      if(!wakeOn) {
-        $('pregunta').value = t;
-        preguntar(true);
-        continue;
-      }
-
-      const norm = t.toLowerCase().normalize('NFD')
-        .replace(/[̀-ͯ]/g,'')
-        .replace(/[^\w\sñ]/g,' ')
-        .replace(/\s+/g,' ')
-        .trim();
-
-      const m = /\b(jarvis|yarvis|harvis|jarbis)\b/.exec(norm);
-
-      if(!m) continue;
-
-      const resto = norm.slice(m.index + m[0].length).trim();
-
-      if(!resto) {
-        mostrarSaludoWake();
-        continue;
-      }
-
-      $('pregunta').value = resto;
-      preguntar(true);
-    }
-  };
-
-  r.onerror = ev => {
-    if(['not-allowed','service-not-allowed','audio-capture'].includes(ev.error)) {
-      wakeOn = false;
-      pintarBotones();
-    }
-
-    $('msg').textContent = msgMic[ev.error] || ('No te escuché (' + ev.error + ').');
-  };
-
-  r.onend = () => {
-    rec = null;
-    $('b-mic').classList.remove('escucha');
-
-    if((wakeOn || convOn) && !hablando) {
-      setTimeout(() => arrancar(true),300);
-    }
-  };
-
-  try {
-    r.start();
-  } catch(e) {
-    rec = null;
-    $('b-mic').classList.remove('escucha');
-  }
-}
-
-function mostrarSaludoWake() {
-  hablar('Hola, ' + sesion.nombre + '. ¿En qué te ayudo?',true);
-}
-
-function pintarBotones() {
-  $('b-wake').classList.toggle('on',wakeOn);
-  $('b-wake').style.color = wakeOn ? 'var(--verde)' : '';
-}
-
-$('b-mic').onclick = () => {
-  if(rec) {
-    rec.stop();
-    return;
-  }
-
-  $('msg').textContent = 'Escuchando… habla ahora.';
-  arrancar(false);
-};
-
-// ── Conversación por voz continua ──
-$('b-conv').onclick = () => {
-  convOn = !convOn;
-  $('b-conv').classList.toggle('on',convOn);
-
-  if(convOn) {
-    wakeOn = false;
-    pintarBotones();
-
-    vozSiempre = true;
-    $('b-voz').textContent = '🔊';
-    $('b-voz').classList.add('on');
-
-    $('msg').textContent = 'Conversación activa. Habla y te respondo en voz.';
-
-    if(rec) rec.stop();
-    arrancar(true);
-
-  } else {
-    if(rec) rec.stop();
-    if('speechSynthesis' in window) speechSynthesis.cancel();
-    $('msg').textContent = 'Conversación por voz apagada.';
-  }
-};
-
-$('b-wake').onclick = () => {
-  convOn = false;
-  $('b-conv').classList.remove('on');
-
-  wakeOn = !wakeOn;
-  pintarBotones();
-
-  if(rec) rec.stop();
-
-  if(wakeOn) {
-    $('msg').textContent = 'Escuchando la palabra "Jarvis"… di "Hola Jarvis" o "Jarvis, dame el precio de…".';
-    arrancar(true);
-  } else {
+  $('btn-entrar').onclick = entrar;
+  $('login-pin').addEventListener('keydown', e => { if (e.key === 'Enter') entrar(); });
+
+  // ── Preguntar ──
+  async function preguntar(hablado) {
+    const txt = $('pregunta');
+    const q = txt.value.trim();
+    if (!q) { $('msg').textContent = 'Escribe o di una pregunta.'; return; }
     $('msg').textContent = '';
+    $('resp').textContent = 'Pensando…';
+    txt.value = ''; txt.style.height = 'auto';
+    try {
+      const r = await llamar({ accion: 'jarvisPreguntar', pregunta: q, cajeroId: sesion.id, pin: sesion.pin });
+      const t = String(r.ok ? r.respuesta : (r.error || 'Jarvis no respondió.')).replace(/\*\*/g, '');
+      $('resp').textContent = t;
+      hablar(t, hablado);
+    } catch (e) { $('resp').textContent = 'Error: ' + e.message; }
   }
-};
+  $('btn-enviar').onclick = () => preguntar(false);
+  $('pregunta').addEventListener('input', e => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'; });
+  $('pregunta').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); preguntar(false); } });
 
-cargarFuncionarios().catch(e => {
-  $('login-msg').textContent = 'No se pudo cargar la lista de nombres: ' + e.message;
-});
+  // ── Voz (respuesta) ──
+  function cargarVoces() {
+    if (!('speechSynthesis' in window)) return;
+    const vs = speechSynthesis.getVoices().filter(v => /^es/i.test(v.lang));
+    const sel = $('voz');
+    sel.innerHTML = '';
+    (vs.length ? vs : []).forEach(v => { const o = document.createElement('option'); o.value = v.name; o.textContent = v.name + ' (' + v.lang + ')'; sel.appendChild(o); });
+    if (!vs.length) { const o = document.createElement('option'); o.textContent = 'Voz por defecto del equipo'; sel.appendChild(o); }
+  }
+  if ('speechSynthesis' in window) { cargarVoces(); speechSynthesis.onvoiceschanged = cargarVoces; }
+
+  let vozSiempre = false;
+  $('b-voz').onclick = () => { vozSiempre = !vozSiempre; $('b-voz').textContent = vozSiempre ? '🔊' : '🔇'; $('b-voz').classList.toggle('on', vozSiempre); };
+
+  // Prepara el texto para la voz: "$13.300" → "13300 pesos" (si no, lo lee como decimales)
+  function paraVoz(t) {
+    return String(t)
+      .replace(/\d{1,3}(?:\.\d{3})+/g, m => m.replace(/\./g, ''))
+      .replace(/\$\s?(\d+)/g, '$1 pesos')
+      .replace(/\$/g, '')
+      .replace(/\*/g, '');
+  }
+  function hablar(t, forzar) {
+    if (!('speechSynthesis' in window) || !(forzar || vozSiempre)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(paraVoz(t));
+    const nombre = $('voz').value;
+    const v = speechSynthesis.getVoices().find(x => x.name === nombre);
+    if (v) { u.voice = v; u.lang = v.lang; } else { u.lang = 'es-CL'; }
+    u.pitch = parseFloat($('tono').value);   // más bajo = voz más grave
+    u.rate = parseFloat($('vel').value);     // velocidad de habla
+    hablando = true;
+    if (rec) { try { rec.abort(); } catch (e) {} }
+    u.onend = () => { hablando = false; if (wakeOn || convOn) setTimeout(() => arrancar(true), 300); };
+    speechSynthesis.speak(u);
+  }
+
+  // ── Micrófono: pregunta única (🎤) o palabra "Jarvis" (👂) ──
+  const msgMic = {
+    'not-allowed': 'El navegador no dio permiso para el micrófono. Revisa el candado de la dirección y permite el micrófono.',
+    'service-not-allowed': 'El navegador no dio permiso para el micrófono.',
+    'audio-capture': 'No encuentro un micrófono conectado.',
+    'no-speech': 'No escuché nada. Intenta de nuevo.',
+    'network': 'Sin conexión para dictar.'
+  };
+  function arrancar(continuo) {
+    if (!SR) { $('msg').textContent = 'Este navegador no permite dictar.'; return; }
+    if (rec) return;
+    const r = new SR();
+    r.lang = 'es-CL'; r.continuous = continuo; r.interimResults = false; r.maxAlternatives = 1;
+    rec = r;
+    $('b-mic').classList.add('escucha');
+    r.onresult = ev => {
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        if (!ev.results[i].isFinal) continue;
+        const t = ev.results[i][0].transcript;
+        if (wakeOn) $('msg').textContent = 'Escuché: "' + t + '"';
+        if (!wakeOn) { $('pregunta').value = t; preguntar(true); continue; }
+        const norm = t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w\sñ]/g, ' ').replace(/\s+/g, ' ').trim();
+        const m = /\b(jarvis|yarvis|harvis|jarbis)\b/.exec(norm);
+        if (!m) continue;
+        const resto = norm.slice(m.index + m[0].length).trim();
+        if (!resto) { mostrarSaludoWake(); continue; }
+        $('pregunta').value = resto; preguntar(true);
+      }
+    };
+    r.onerror = ev => {
+      if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(ev.error)) { wakeOn = false; pintarBotones(); }
+      $('msg').textContent = msgMic[ev.error] || ('No te escuché (' + ev.error + ').');
+    };
+    r.onend = () => {
+      rec = null;
+      $('b-mic').classList.remove('escucha');
+      if ((wakeOn || convOn) && !hablando) setTimeout(() => arrancar(true), 300);
+    };
+    try { r.start(); } catch (e) { rec = null; $('b-mic').classList.remove('escucha'); }
+  }
+  function mostrarSaludoWake() { hablar('Hola, ' + sesion.nombre + '. ¿En qué te ayudo?', true); }
+  function pintarBotones() {
+    $('b-wake').classList.toggle('on', wakeOn);
+    $('b-wake').style.color = wakeOn ? 'var(--verde)' : '';
+  }
+  $('b-mic').onclick = () => { if (rec) { rec.stop(); return; } $('msg').textContent = 'Escuchando… habla ahora.'; arrancar(false); };
+  // Conversación por voz: escucha continua, cada frase es una pregunta y la respuesta se lee en voz alta
+  $('b-conv').onclick = () => {
+    convOn = !convOn;
+    $('b-conv').classList.toggle('on', convOn);
+    if (convOn) {
+      wakeOn = false; pintarBotones();
+      vozSiempre = true; $('b-voz').textContent = '🔊'; $('b-voz').classList.add('on');
+      $('msg').textContent = 'Conversación activa. Habla y te respondo en voz.';
+      if (rec) rec.stop();
+      arrancar(true);
+    } else {
+      if (rec) rec.stop();
+      if ('speechSynthesis' in window) speechSynthesis.cancel();
+      $('msg').textContent = 'Conversación por voz apagada.';
+    }
+  };
+  $('b-wake').onclick = () => {
+    convOn = false; $('b-conv').classList.remove('on');
+    wakeOn = !wakeOn; pintarBotones();
+    if (rec) rec.stop();
+    if (wakeOn) { $('msg').textContent = 'Escuchando la palabra "Jarvis"… di "Hola Jarvis" o "Jarvis, dame el precio de…".'; arrancar(true); }
+    else $('msg').textContent = '';
+  };
+
+  cargarFuncionarios().catch(e => { $('login-msg').textContent = 'No se pudo cargar la lista de nombres: ' + e.message; });
 </script>
 </body>
 </html>
